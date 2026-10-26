@@ -4,6 +4,7 @@ from .base import BaseTemplate
 class AiAgentsPythonTemplate(BaseTemplate):
     id = "ai_agents_python"
     name = "AI Agent / Multi-Agent Backend (Python + FastAPI + LangGraph)"
+    short_name = "AI Agent Backend (LangGraph + FastAPI)"
     description = "Asynchronous multi-agent framework starter with state graphs, tool routing, memory, and FastAPI endpoints."
     category = "AI / Agentic"
     has_node = False

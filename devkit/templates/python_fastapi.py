@@ -4,6 +4,7 @@ from .base import BaseTemplate
 class PythonFastAPITemplate(BaseTemplate):
     id = "python_fastapi"
     name = "Python Backend / API (FastAPI + Typer + venv)"
+    short_name = "Python Backend / API (FastAPI)"
     description = "Modern Python 3.10+ async backend with FastAPI, Pydantic v2, Typer CLI, pytest, and auto-configured venv."
     category = "Backend / API"
     has_node = False

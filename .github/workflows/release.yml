@@ -1,0 +1,230 @@
+name: Build, Release & Publish adevkit
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Version tag override (e.g. 0.1.0). Leave empty to read from pyproject.toml'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  test:
+    name: Run Automated Tests
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies & Test Tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Execute Pytest Suite
+        run: |
+          pytest tests/ -v
+
+  build-and-release:
+    name: Build Standalone Executable, MSI & Publish GitHub Release
+    needs: test
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code with Tags
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Determine Release Version
+        id: get_version
+        shell: pwsh
+        run: |
+          $verInput = "${{ github.event.inputs.release_version }}".Trim()
+          if ($verInput) {
+            $version = $verInput.TrimStart('v')
+          } elseif ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $version = $env:GITHUB_REF_NAME.TrimStart('v')
+          } else {
+            # Extract from pyproject.toml
+            $content = Get-Content "pyproject.toml" -Raw
+            if ($content -match 'version\s*=\s*["'']([^"'']+)["'']') {
+              $version = $matches[1]
+            } else {
+              $version = "0.1.0"
+            }
+          }
+          Write-Host "Determined Release Version: $version" -ForegroundColor Green
+          echo "VERSION=$version" >> $env:GITHUB_ENV
+          echo "TAG_NAME=v$version" >> $env:GITHUB_ENV
+
+      - name: Install Packaging Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller build
+
+      - name: Compile Standalone Executable (PyInstaller)
+        shell: pwsh
+        run: |
+          pyinstaller --clean --noconfirm devkit.spec
+          if (!(Test-Path "dist\devkit.exe")) {
+            Write-Error "dist\devkit.exe was not created."
+            exit 1
+          }
+          Write-Host "Verifying compiled executable:" -ForegroundColor Cyan
+          & "dist\devkit.exe" info
+
+      - name: Prepare Output Directory & Portable Zip
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path "output" -Force | Out-Null
+          $zipPath = "output\devkit-v$env:VERSION-windows-x64.zip"
+          Compress-Archive -Path "dist\devkit.exe" -DestinationPath $zipPath -Force
+          Write-Host "Created portable archive: $zipPath" -ForegroundColor Green
+
+      - name: Build Python Distribution (Wheel & Source Archive)
+        shell: pwsh
+        run: |
+          python -m build --outdir output
+          Write-Host "Generated distribution packages in output/" -ForegroundColor Green
+
+      - name: Install WiX Toolset
+        shell: pwsh
+        run: |
+          choco install wixtoolset -y --no-progress
+          $wixPath = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+          if (Test-Path $wixPath) {
+            echo "$wixPath" >> $env:GITHUB_PATH
+          }
+
+      - name: Build Native Windows MSI Installer
+        shell: pwsh
+        run: |
+          $env:PATH = "C:\Program Files (x86)\WiX Toolset v3.11\bin;$env:PATH"
+          .\installer\build_msi.ps1 -Version $env:VERSION -DistDir "dist" -OutputDir "output"
+
+      - name: Generate Checksums
+        shell: pwsh
+        run: |
+          $artifacts = Get-ChildItem -Path "output\*" -Include "*.msi", "*.zip", "*.whl", "*.tar.gz"
+          $checksumLines = @()
+          foreach ($file in $artifacts) {
+            $hash = (Get-FileHash -Path $file.FullName -Algorithm SHA256).Hash.ToLower()
+            $name = $file.Name
+            $checksumLines += "$hash  $name"
+          }
+          $checksumLines | Out-File -FilePath "output\SHA256SUMS.txt" -Encoding ascii
+          Write-Host "Generated SHA256SUMS.txt:" -ForegroundColor Yellow
+          Get-Content "output\SHA256SUMS.txt"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          name: Aayush's DevKit (${{ env.TAG_NAME }})
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            output/*.msi
+            output/*.zip
+            output/*.whl
+            output/*.tar.gz
+            output/SHA256SUMS.txt
+          body: |
+            ## ⚡ Aayush's DevKit (${{ env.TAG_NAME }})
+            
+            Single-command project scaffolding with Agentic skills (`.agents/skills/`), custom templates, and automated environment configuration.
+            
+            ---
+            
+            ### 📦 Installation Options
+            
+            #### 1. Via PyPI (`pip install`)
+            ```bash
+            pip install --upgrade adevkit
+            ```
+            Once installed, run:
+            ```bash
+            devkit init
+            ```
+            
+            #### 2. Native Windows MSI Installer (Recommended for Windows)
+            Download and run **`AayushsDevKit-v${{ env.VERSION }}-x64.msi`**.
+            - Installs to `C:\Program Files\Aayush's DevKit\`
+            - **Automatically configures your system `PATH`** so `devkit` is globally available anywhere in PowerShell or CMD.
+            
+            #### 3. Portable Standalone Binary
+            Download **`devkit-v${{ env.VERSION }}-windows-x64.zip`**, extract `devkit.exe`, and place it in any folder in your `PATH`.
+            
+            ---
+            
+            ### 🚀 Verification & Quick Start
+            Open a new terminal and verify installation:
+            ```powershell
+            devkit info
+            ```
+            
+            Initialize a new project:
+            ```powershell
+            devkit init
+            ```
+            
+            ---
+            
+            ### 🔐 Integrity Verification
+            Verify downloads against **`SHA256SUMS.txt`**:
+            ```powershell
+            Get-FileHash -Algorithm SHA256 .\AayushsDevKit-v${{ env.VERSION }}-x64.msi
+            ```
+
+  publish-pypi:
+    name: Build & Publish Package to PyPI (adevkit)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Build Tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Build sdist and wheel
+        run: |
+          python -m build
+
+      - name: Publish Package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip-existing: true

@@ -5,6 +5,7 @@ from .base import BaseTemplate
 class ExpoFullstackTemplate(BaseTemplate):
     id = "expo_fullstack"
     name = "Full-Stack Expo Mobile + Backend Monorepo (frontend/ & backend/)"
+    short_name = "Expo Mobile + Backend Monorepo"
     description = "Monorepo with Expo React Native mobile frontend/ and selectable backend/ (FastAPI or Hono Node.js)."
     category = "Mobile / Full-Stack"
 

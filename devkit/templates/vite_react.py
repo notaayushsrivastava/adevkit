@@ -4,6 +4,7 @@ from .base import BaseTemplate
 class ViteReactTemplate(BaseTemplate):
     id = "vite_react"
     name = "Frontend SPA (Vite + React + Tailwind + TypeScript)"
+    short_name = "Frontend SPA (Vite + React)"
     description = "Ultra-fast frontend Single Page Application with Vite 5, React 18, TypeScript, and Tailwind CSS."
     category = "Frontend"
     has_node = True

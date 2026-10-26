@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define ProductVersion = "$(var.Version)" ?>
+  <?define Manufacturer = "Aayush" ?>
+  <?define ProductName = "Aayush's DevKit" ?>
+  <?define UpgradeCode = "e8f4a180-2a8e-4a65-8b3d-71b56a938c41" ?>
+
+  <Product
+    Id="*"
+    Name="$(var.ProductName)"
+    Language="1033"
+    Version="$(var.ProductVersion)"
+    Manufacturer="$(var.Manufacturer)"
+    UpgradeCode="$(var.UpgradeCode)">
+
+    <Package
+      InstallerVersion="405"
+      Compressed="yes"
+      InstallScope="perMachine"
+      Description="Aayush's DevKit - Single command project initialisation with agent skills and environments"
+      Comments="Installs Aayush's DevKit CLI and configures system PATH" />
+
+    <MajorUpgrade
+      DowngradeErrorMessage="A newer version of $(var.ProductName) is already installed."
+      AllowSameVersionUpgrades="yes" />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Directory Structure -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="INSTALLFOLDER" Name="Aayush's DevKit" />
+      </Directory>
+    </Directory>
+
+    <!-- Components -->
+    <DirectoryRef Id="INSTALLFOLDER">
+      <!-- DevKit Executable Component -->
+      <Component Id="MainExecutable" Guid="3fa85f64-5717-4562-b3fc-2c963f664532" Win64="yes">
+        <File
+          Id="DevKitExecutable"
+          Source="$(var.SourceDir)\devkit.exe"
+          KeyPath="yes" />
+      </Component>
+
+      <!-- System PATH Configuration Component -->
+      <Component Id="PathEnvironment" Guid="a2b63897-4221-4f1e-a578-83b6f0e34b12" Win64="yes">
+        <CreateFolder />
+        <Environment
+          Id="SystemPath"
+          Name="PATH"
+          Value="[INSTALLFOLDER]"
+          Permanent="no"
+          Part="last"
+          Action="set"
+          System="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- Feature Definition -->
+    <Feature Id="MainApplication" Title="$(var.ProductName)" Level="1">
+      <ComponentRef Id="MainExecutable" />
+      <ComponentRef Id="PathEnvironment" />
+    </Feature>
+  </Product>
+</Wix>

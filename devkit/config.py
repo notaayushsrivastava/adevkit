@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 # Base user directory for global Aayush's DevKit settings & custom templates
@@ -7,7 +8,11 @@ USER_TEMPLATES_DIR = USER_DEVKIT_DIR / "templates"
 USER_CONFIG_FILE = USER_DEVKIT_DIR / "config.json"
 
 # Package directory containing embedded default skills/templates
-PACKAGE_ROOT = Path(__file__).parent.resolve()
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+    PACKAGE_ROOT = Path(sys._MEIPASS) / "devkit"
+else:
+    PACKAGE_ROOT = Path(__file__).parent.resolve()
+
 EMBEDDED_SKILLS_DIR = PACKAGE_ROOT / "skills" / "embedded"
 
 def ensure_user_dirs():

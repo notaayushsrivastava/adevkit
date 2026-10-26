@@ -47,23 +47,25 @@
 
 ## 📦 Quick Start
 
-### 1. Run Directly
+### 1. Install via PyPI (Recommended)
+```bash
+pip install adevkit
+```
+Now run `devkit` or `adevkit` anywhere in your terminal:
+```bash
+devkit init
+```
+
+### 2. Windows Native MSI Installer
+Download and execute `AayushsDevKit-v0.1.0-x64.msi` from the [Releases](https://github.com/aayush/aayush-devkit/releases) tab. It automatically adds `devkit` to your system `PATH`.
+
+### 3. Run Directly from Source
 ```powershell
 python app.py
 ```
 Or with Windows command script:
 ```powershell
 .\devkit.cmd
-```
-
-### 2. Global Installation
-Install globally in editable mode:
-```powershell
-pip install -e .
-```
-Now run `devkit` from any folder in your terminal:
-```powershell
-devkit init
 ```
 
 ---
@@ -123,6 +125,33 @@ The test suite covers all 10 templates, custom template snapshots, skills instal
 ```powershell
 .\.venv\Scripts\pytest.exe tests/ -v
 ```
+
+---
+
+## 🚀 CI/CD & Automated MSI Release
+
+This repository includes a dedicated GitHub Actions workflow ([`.github/workflows/release.yml`](.github/workflows/release.yml)) that automates building and releasing the application.
+
+### Pipeline Workflow:
+1. **Quality Gate**: Runs the full `pytest` suite on `windows-latest`.
+2. **PyInstaller Compilation**: Builds a self-contained `devkit.exe` bundling all 42 agent skills and templates (target machines require zero Python setup).
+3. **WiX MSI Installer Packaging**: Uses WiX Toolset to produce `AayushsDevKit-v<version>-x64.msi`, which installs to `Program Files` and **configures the system `PATH` environment variable**.
+4. **PyPI Publishing (`adevkit`)**: Builds wheel & source tarball, and publishes automatically to PyPI via `pypa/gh-action-pypi-publish` using the GitHub secret `PYPI_API_TOKEN`.
+5. **Portable Zip & SHA256 Checksums**: Compresses `devkit.exe` into a portable `.zip` and generates `SHA256SUMS.txt`.
+6. **GitHub Release Publication**: Automatically publishes the release under the version tag specified in `pyproject.toml` (e.g., `v0.1.0`) with `.msi`, `.zip`, `.whl`, `.tar.gz`, and checksums.
+
+### Prerequisites for PyPI Publishing:
+Add your PyPI API token to your GitHub repository secrets:
+- Name: **`PYPI_API_TOKEN`**
+- Value: `pypi-AgEIcHlwaS5vcmc...` (Generated from [pypi.org/manage/account/token/](https://pypi.org/manage/account/token/))
+
+### Triggering a Release:
+- **Pushing a tag**:
+  ```powershell
+  git tag v0.1.0
+  git push origin v0.1.0
+  ```
+- **Manual Dispatch**: Go to the **Actions** tab on GitHub, select **Build & Release Aayush's DevKit**, and click **Run workflow**.
 
 ---
 

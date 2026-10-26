@@ -4,6 +4,7 @@ from .base import BaseTemplate
 class NextjsTemplate(BaseTemplate):
     id = "nextjs"
     name = "Full-Stack Next.js (TypeScript + Tailwind + shadcn)"
+    short_name = "Next.js Full-Stack (App Router)"
     description = "Modern Next.js 14/15 App Router, React 19, TypeScript, Tailwind CSS, Lucide Icons, and shadcn setup."
     category = "Full-Stack"
     has_node = True

@@ -1,9 +1,9 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "aayush-devkit"
+name = "adevkit"
 version = "0.1.0"
 description = "Aayush's DevKit - Single command project initialisation with agent skills and environments"
 readme = "README.md"
@@ -18,7 +18,11 @@ dependencies = [
 
 [project.scripts]
 devkit = "devkit.cli:main"
+adevkit = "devkit.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["devkit*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.*", "**/*", "**/**/*"]

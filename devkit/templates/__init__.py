@@ -32,6 +32,7 @@ def get_all_templates() -> List[Dict]:
         templates.append({
             "id": tid,
             "name": cls.name,
+            "short_name": getattr(cls, "short_name", "") or cls.name,
             "description": cls.description,
             "category": cls.category,
             "is_custom": False,
@@ -43,6 +44,7 @@ def get_all_templates() -> List[Dict]:
         templates.append({
             "id": f"custom:{c['id']}",
             "name": f"✨ {c['name']} (Custom)",
+            "short_name": f"✨ {c['name']} (Custom)",
             "description": c["description"],
             "category": "Custom",
             "is_custom": True,

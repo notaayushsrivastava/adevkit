@@ -4,6 +4,7 @@ from .base import BaseTemplate
 class MinimalAgenticTemplate(BaseTemplate):
     id = "minimal_agentic"
     name = "Minimal Agentic Repo (Blank starter + Agent Skills)"
+    short_name = "Minimal Agentic Starter"
     description = "Clean, stack-agnostic blank repository primed for AI pair programming with AGENTS.md, PRD.md, and skills."
     category = "Agentic / Starter"
     has_node = False

@@ -5,6 +5,7 @@ from typing import Dict, Any, List
 class BaseTemplate(ABC):
     id: str = "base"
     name: str = "Base Template"
+    short_name: str = ""
     description: str = "Base project template"
     category: str = "General"
     has_node: bool = False

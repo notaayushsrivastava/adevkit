@@ -1,3 +1,22 @@
-.venv/*
+# Environments
+.venv/
+env/
+venv/
+
+# Build and Packaging
+dist/
+build/
+output/
+*.egg-info/
+*.wixobj
+*.wixpdb
+*.msi
+*.zip
+
+# Python Cache
+*/__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Agent Skills workspace working copy
 .agents/*
-*__pycache__/*

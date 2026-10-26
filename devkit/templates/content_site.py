@@ -4,6 +4,7 @@ from .base import BaseTemplate
 class ContentSiteTemplate(BaseTemplate):
     id = "content_site"
     name = "Modern Content & Marketing Site (Astro / Typography Polish)"
+    short_name = "Content & Marketing Site (Astro)"
     description = "Blazing-fast content and marketing website with Astro 4, Tailwind Typography, SEO metadata, and zero JS by default."
     category = "Content / Marketing"
     has_node = True

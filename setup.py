@@ -1,9 +1,13 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="aayush-devkit",
+    name="adevkit",
     version="0.1.0",
     packages=find_packages(),
+    include_package_data=True,
+    package_data={
+        "": ["*.*", "**/*", "**/**/*"],
+    },
     install_requires=[
         "typer>=0.12.0",
         "rich>=13.0.0",
@@ -14,6 +18,7 @@ setup(
     entry_points={
         "console_scripts": [
             "devkit=devkit.cli:main",
+            "adevkit=devkit.cli:main",
         ],
     },
 )

@@ -4,6 +4,7 @@ from .base import BaseTemplate
 class DesignSystemTemplate(BaseTemplate):
     id = "design_system"
     name = "Design System & Component Library (React + Tailwind + Motion)"
+    short_name = "Design System & UI Library (React + Motion)"
     description = "Tokenized UI component library with Framer Motion, accessible primitives, and interactive showcase catalog."
     category = "Design / Components"
     has_node = True

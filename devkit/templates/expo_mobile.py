@@ -4,6 +4,7 @@ from .base import BaseTemplate
 class ExpoMobileTemplate(BaseTemplate):
     id = "expo_mobile"
     name = "Mobile App (React Native / Expo + TypeScript)"
+    short_name = "Mobile App (React Native / Expo)"
     description = "Cross-platform mobile application powered by Expo SDK, React Native, and TypeScript."
     category = "Mobile"
     has_node = True

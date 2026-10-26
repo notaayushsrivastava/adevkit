@@ -4,6 +4,7 @@ from .base import BaseTemplate
 class SaasFullstackTemplate(BaseTemplate):
     id = "saas_fullstack"
     name = "Full-Stack SaaS Boilerplate (Next.js 15 + Prisma + Stripe + Auth)"
+    short_name = "SaaS Boilerplate (Next.js 15 + Stripe)"
     description = "Production-grade SaaS starter with Next.js 15 App Router, Tailwind CSS, Prisma DB, Stripe payments, and Auth."
     category = "SaaS / Full-Stack"
     has_node = True
