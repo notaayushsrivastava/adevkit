@@ -29,6 +29,17 @@ def prompt_template_selection(templates: List[Dict]) -> str:
         default=choices[0].value if choices else None,
     ).execute()
 
+def prompt_expo_backend_stack() -> str:
+    """Prompt the user for their preferred backend stack in the Expo fullstack monorepo."""
+    return inquirer.select(
+        message="Select the backend stack for backend/:",
+        choices=[
+            Choice(value="fastapi", name="Python (FastAPI + Pydantic + Uvicorn)"),
+            Choice(value="hono", name="Node.js / TypeScript (Hono + Node Server)"),
+        ],
+        default="fastapi",
+    ).execute()
+
 def prompt_skills_selection(
     available_skills: Dict[str, Any],
     recommended_skills: List[str],

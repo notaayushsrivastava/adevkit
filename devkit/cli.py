@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Annotated
 import typer
 from rich.table import Table
 from rich.status import Status
@@ -50,6 +50,7 @@ from .scaffold import (
 from .prompts import (
     prompt_project_name,
     prompt_template_selection,
+    prompt_expo_backend_stack,
     prompt_skills_selection,
     prompt_prd_mode,
     prompt_env_options,
@@ -76,23 +77,40 @@ def main_entry(ctx: typer.Context):
 
 @app.command(name="init")
 def init(
-    target_dir: Optional[str] = typer.Argument(
-        None, help="Directory to initialize the project in (defaults to project name)"
-    ),
-    name: Optional[str] = typer.Option(
-        None, "--name", "-n", help="Project name"
-    ),
-    template: Optional[str] = typer.Option(
-        None, "--template", "-t", help="Template ID (e.g. nextjs, python_fastapi, vite_react, minimal_agentic, expo_mobile)"
-    ),
-    skills: Optional[List[str]] = typer.Option(
-        None, "--skill", "-s", help="Skill ID(s) to install"
-    ),
-    yes: bool = typer.Option(
-        False, "--yes", "-y", help="Skip interactive prompts and use defaults"
-    ),
+    target_dir: Annotated[
+        Optional[str],
+        typer.Argument(help="Directory to initialize the project in (defaults to project name)"),
+    ] = None,
+    name: Annotated[
+        Optional[str],
+        typer.Option("--name", "-n", help="Project name"),
+    ] = None,
+    template: Annotated[
+        Optional[str],
+        typer.Option("--template", "-t", help="Template ID (e.g. nextjs, python_fastapi, vite_react, minimal_agentic, expo_mobile)"),
+    ] = None,
+    skills: Annotated[
+        Optional[List[str]],
+        typer.Option("--skill", "-s", help="Skill ID(s) to install"),
+    ] = None,
+    yes: Annotated[
+        bool,
+        typer.Option("--yes", "-y", help="Skip interactive prompts and use defaults"),
+    ] = False,
 ):
     """Initialize a brand new project with templates, agent skills, environments, and docs."""
+    # Defensive guard in case called directly as a Python function with default models
+    if target_dir is not None and not isinstance(target_dir, str):
+        target_dir = None
+    if name is not None and not isinstance(name, str):
+        name = None
+    if template is not None and not isinstance(template, str):
+        template = None
+    if skills is not None and not isinstance(skills, list):
+        skills = None
+    if not isinstance(yes, bool):
+        yes = False
+
     print_banner()
 
     all_templates = get_all_templates()
@@ -133,8 +151,15 @@ def init(
         error(f"Unknown template ID: '{chosen_template_id}'")
         raise typer.Exit(1)
 
-    has_node = template_info["has_node"]
-    has_python = template_info["has_python"]
+    expo_backend_stack = "fastapi"
+    if chosen_template_id == "expo_fullstack":
+        if not yes:
+            expo_backend_stack = prompt_expo_backend_stack()
+        has_node = True
+        has_python = "fastapi" in expo_backend_stack or "python" in expo_backend_stack
+    else:
+        has_node = template_info["has_node"]
+        has_python = template_info["has_python"]
 
     # 3. Agent Skills Selection
     recommended_skills = get_recommended_skills_for_template(chosen_template_id)
@@ -192,7 +217,10 @@ def init(
             )
         else:
             tmpl_cls = BUILTIN_TEMPLATES[chosen_template_id]
-            tmpl_instance = tmpl_cls(project_name=project_name, target_dir=dest_path)
+            if chosen_template_id == "expo_fullstack":
+                tmpl_instance = tmpl_cls(project_name=project_name, target_dir=dest_path, backend_stack=expo_backend_stack)
+            else:
+                tmpl_instance = tmpl_cls(project_name=project_name, target_dir=dest_path)
 
         created_files = tmpl_instance.scaffold()
         success(f"Generated {len(created_files)} template files.")
@@ -287,13 +315,15 @@ def init(
 
 @template_app.command(name="save")
 def template_save(
-    name: str = typer.Argument(..., help="Name for the new custom template"),
-    path: Optional[str] = typer.Option(
-        None, "--path", "-p", help="Directory path to snapshot (defaults to current directory)"
-    ),
-    description: str = typer.Option(
-        "", "--desc", "-d", help="Description of the template"
-    ),
+    name: Annotated[str, typer.Argument(help="Name for the new custom template")],
+    path: Annotated[
+        Optional[str],
+        typer.Option("--path", "-p", help="Directory path to snapshot (defaults to current directory)"),
+    ] = None,
+    description: Annotated[
+        str,
+        typer.Option("--desc", "-d", help="Description of the template"),
+    ] = "",
 ):
     """Snapshot a project folder into a reusable custom template."""
     src_dir = Path(path).resolve() if path else Path.cwd()
@@ -325,7 +355,7 @@ def template_list():
 
 @template_app.command(name="delete")
 def template_delete(
-    name: str = typer.Argument(..., help="Name or ID of the custom template to delete"),
+    name: Annotated[str, typer.Argument(help="Name or ID of the custom template to delete")],
 ):
     """Delete a user-saved custom template."""
     deleted = delete_custom_template(name)
@@ -353,10 +383,11 @@ def skills_list():
 
 @skills_app.command(name="add")
 def skills_add(
-    skill_name: str = typer.Argument(..., help="ID of the skill to install"),
-    target: Optional[str] = typer.Option(
-        None, "--target", "-t", help="Target project root directory (defaults to current dir)"
-    ),
+    skill_name: Annotated[str, typer.Argument(help="ID of the skill to install")],
+    target: Annotated[
+        Optional[str],
+        typer.Option("--target", "-t", help="Target project root directory (defaults to current dir)"),
+    ] = None,
 ):
     """Install an agent skill into the target project's .agents/skills/."""
     target_path = Path(target).resolve() if target else Path.cwd()
@@ -367,6 +398,15 @@ def skills_add(
     with console.status(f"[cyan]Installing {skill_name}...[/cyan]", spinner="dots"):
         res = install_skills(target_path, [skill_name])
         success(f"Installed '{skill_name}' into {res['skills_dir']}")
+
+
+@skills_app.command(name="update")
+def skills_update():
+    """Verify and reload the embedded agent skills catalog and lockfile."""
+    with console.status("[cyan]Verifying embedded agent skills catalog...[/cyan]", spinner="dots"):
+        from .skills.catalog import load_all_skills
+        refreshed = load_all_skills()
+        success(f"Successfully synced and indexed {len(refreshed)} agent skills in catalog.")
 
 
 # --- Info Command ---

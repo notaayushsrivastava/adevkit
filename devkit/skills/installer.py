@@ -38,6 +38,16 @@ def install_skills(target_dir: Path, skill_ids: List[str]) -> Dict[str, Any]:
         except Exception:
             lock_data = {"version": 1, "skills": {}}
 
+    # Read embedded master lockfile if available
+    embedded_lock_file = EMBEDDED_SKILLS_DIR / "skills-lock.json"
+    embedded_lock_data = {}
+    if embedded_lock_file.exists():
+        try:
+            with open(embedded_lock_file, "r", encoding="utf-8") as f:
+                embedded_lock_data = json.load(f).get("skills", {})
+        except Exception:
+            embedded_lock_data = {}
+
     installed_skills = []
 
     for sid in skill_ids:
@@ -76,14 +86,15 @@ description: {desc}
 """
             skill_md.write_text(content, encoding="utf-8")
 
-        # Compute hash of primary SKILL.md
-        computed_hash = _compute_sha256(skill_md) if skill_md.exists() else ""
+        # Compute hash of primary SKILL.md or take from embedded master lockfile
+        master_entry = embedded_lock_data.get(sid, {})
+        computed_hash = master_entry.get("computedHash") or (_compute_sha256(skill_md) if skill_md.exists() else "")
 
         # Update lockfile data
         lock_data["skills"][sid] = {
-            "source": skill_info.source if skill_info else f"custom/{sid}",
-            "sourceType": skill_info.source_type if skill_info else "custom",
-            "skillPath": f"skills/{sid}/SKILL.md",
+            "source": master_entry.get("source") or (skill_info.source if skill_info else f"custom/{sid}"),
+            "sourceType": master_entry.get("sourceType") or (skill_info.source_type if skill_info else "custom"),
+            "skillPath": master_entry.get("skillPath") or f"skills/{sid}/SKILL.md",
             "computedHash": computed_hash,
         }
         installed_skills.append(sid)

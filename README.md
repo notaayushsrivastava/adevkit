@@ -9,23 +9,30 @@
 ## 🚀 Features
 
 - **Interactive Terminal UI**: Built with `Typer`, `Rich`, and `InquirerPy` featuring branded ASCII art, arrow-key navigation, live progress spinners, and status tables.
-- **5 Built-In Project Starters**:
+- **10 Built-In Project Starters**:
   1. `nextjs`: Full-Stack Next.js 14/15 App Router, React 19, TypeScript, Tailwind CSS, Lucide Icons, and shadcn-ready layout.
-  2. `python_fastapi`: Modern async Python backend with FastAPI, Pydantic v2, Typer CLI, and automated `.venv` & pytest.
-  3. `vite_react`: Ultra-fast Frontend SPA with Vite 5, React 18, TypeScript, and Tailwind CSS.
-  4. `minimal_agentic`: Clean blank repository with agent tools, `AGENTS.md`, and `PRD.md` ready for AI pair programming.
-  5. `expo_mobile`: Cross-platform mobile starter with React Native, Expo SDK, and TypeScript.
+  2. `saas_fullstack`: Production-grade SaaS starter with Next.js 15, Prisma ORM, Stripe subscriptions, and Auth.
+  3. `design_system`: Tokenized UI component library with Framer Motion, accessible primitives, and interactive showcase.
+  4. `content_site`: Blazing-fast content and marketing website with Astro 4, Tailwind Typography, and zero JS by default.
+  5. `python_fastapi`: Modern async Python backend with FastAPI, Pydantic v2, Typer CLI, and automated `.venv` & pytest.
+  6. `ai_agents_python`: Asynchronous multi-agent framework starter with state graphs, memory, and FastAPI endpoints.
+  7. `vite_react`: Ultra-fast Frontend SPA with Vite 5, React 18, TypeScript, and Tailwind CSS.
+  8. `minimal_agentic`: Clean blank repository with agent tools, `AGENTS.md`, and `PRD.md` ready for AI pair programming.
+  9. `expo_mobile`: Cross-platform mobile starter with React Native, Expo SDK, and TypeScript.
+  10. `expo_fullstack`: Monorepo with Expo React Native mobile `frontend/` and selectable `backend/` (FastAPI or Node.js Hono).
 - **Custom Template Engine**:
   - `devkit template save <NAME>`: Snapshot any existing directory or repo into reusable custom templates saved in `~/.aayush-devkit/templates/`.
   - `devkit template list`: View all built-in and custom templates.
   - `devkit template delete <NAME>`: Cleanly remove saved templates.
-- **Agentic Skills Integration**:
-  - Embeds curated agent skills directly into `.agents/skills/` and generates compliant `skills-lock.json` with sha256 checksums.
-  - Built-in skills include:
-    - **Ponytail Suite**: `ponytail`, `ponytail-audit`, `ponytail-review`, `ponytail-debt` (lazy senior dev mode).
-    - **Modern Web**: HTML5/CSS standards, container queries, view transitions, and accessibility.
-    - **Chrome DevTools**: Browser automation, DOM/CSS debugging, and performance profiling.
-    - **Gemini API Dev**: Text/multimodal prompts, structured outputs, streaming, and tool calling.
+- **42 Embedded Curated Agent Skills**:
+  - Direct, 100% offline access to all curated skills with automatic `.agents/skills/` population and valid `skills-lock.json` generation.
+  - Sourced from top engineering leaders:
+    - **`pbakaus/impeccable`**: Design craftsmanship, typography hierarchy, spacing & layout polish.
+    - **`Leonxlnx/taste-skill` (`design-taste-frontend`)**: Aesthetic taste, anti-generic UI, distinctive art direction & color harmony.
+    - **`DietrichGebert/ponytail`**: `ponytail`, `ponytail-audit`, `ponytail-review`, `ponytail-debt`, `ponytail-gain`, `ponytail-help`.
+    - **`vercel-labs/agent-skills`**: `vercel-react-best-practices`, `vercel-composition-patterns`, `vercel-optimize`, `deploy-to-vercel`, `vercel-react-view-transitions`.
+    - **`nextlevelbuilder/ui-ux-pro-max-skill`**: `ui-ux-pro-max`, `design`, `design-system`, `ui-styling`, `brand`, `banner-design`, `slides`.
+    - **`emilkowalski/skills`**: `emil-design-eng`, `animate`, `animate-expo`, `animation-performance`, `apple-design`, `break-ui`, `improve-animations`, `mobile-native`.
 - **Automated Environment Setup**:
   - **Python**: Creates `.venv` using active Python interpreter, installs `requirements.txt`.
   - **Node.js**: Automatically detects `bun`, `pnpm`, `yarn`, or `npm` and installs `node_modules`.
@@ -33,7 +40,7 @@
   - **Environment**: Copies `.env.example` to `.env` without overwriting.
   - **VSCode**: Scaffolds `.vscode/settings.json` and `.vscode/extensions.json`.
 - **Intelligent Documentation**:
-  - **`AGENTS.md`**: Pre-configured architectural guidelines, dev/build/test commands, and rules for AI assistants (Antigravity, Cursor, Claude Code, Gemini CLI).
+  - **`AGENTS.md`**: Injects tailored guidelines for AI assistants (Antigravity, Cursor, Claude Code, Gemini CLI), including anti-generic design rules and Vercel Server Component patterns when relevant skills are selected.
   - **`PRD.md`**: Guided prompt wizard, standardized comprehensive starter, or path-based import.
 
 ---
@@ -69,10 +76,10 @@ devkit init
 devkit init
 
 # Specify name and target directory
-devkit init my-api -t python_fastapi
+devkit init my-saas -t saas_fullstack
 
 # Non-interactive / CI mode
-devkit init my-app -t nextjs -s ponytail -s modern-web-guidance --yes
+devkit init my-app -t nextjs -s ponytail -s impeccable -s design-taste-frontend --yes
 ```
 
 ### Manage Custom Templates
@@ -96,7 +103,10 @@ devkit template delete my-starter
 devkit skills list
 
 # Install a skill into the current project
-devkit skills add modern-web-guidance
+devkit skills add impeccable
+
+# Sync and reload skills catalog
+devkit skills update
 ```
 
 ### System Diagnostics
@@ -108,7 +118,7 @@ devkit info
 
 ## 🧪 Running Tests
 
-The test suite covers template scaffolding, custom template snapshots, skills installation, lockfile verification, and environment setup:
+The test suite covers all 10 templates, custom template snapshots, skills installation, lockfile verification, and environment setup:
 
 ```powershell
 .\.venv\Scripts\pytest.exe tests/ -v

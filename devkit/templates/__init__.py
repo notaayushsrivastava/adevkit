@@ -5,14 +5,24 @@ from .python_fastapi import PythonFastAPITemplate
 from .vite_react import ViteReactTemplate
 from .minimal_agentic import MinimalAgenticTemplate
 from .expo_mobile import ExpoMobileTemplate
+from .saas_fullstack import SaasFullstackTemplate
+from .design_system import DesignSystemTemplate
+from .content_site import ContentSiteTemplate
+from .ai_agents_python import AiAgentsPythonTemplate
+from .expo_fullstack import ExpoFullstackTemplate
 from .custom import CustomProjectTemplate, list_custom_templates, save_custom_template, delete_custom_template
 
 BUILTIN_TEMPLATES: Dict[str, Type[BaseTemplate]] = {
     "nextjs": NextjsTemplate,
+    "saas_fullstack": SaasFullstackTemplate,
+    "design_system": DesignSystemTemplate,
+    "content_site": ContentSiteTemplate,
     "python_fastapi": PythonFastAPITemplate,
+    "ai_agents_python": AiAgentsPythonTemplate,
     "vite_react": ViteReactTemplate,
     "minimal_agentic": MinimalAgenticTemplate,
     "expo_mobile": ExpoMobileTemplate,
+    "expo_fullstack": ExpoFullstackTemplate,
 }
 
 def get_all_templates() -> List[Dict]:
@@ -46,10 +56,15 @@ def get_all_templates() -> List[Dict]:
 __all__ = [
     "BaseTemplate",
     "NextjsTemplate",
+    "SaasFullstackTemplate",
+    "DesignSystemTemplate",
+    "ContentSiteTemplate",
     "PythonFastAPITemplate",
+    "AiAgentsPythonTemplate",
     "ViteReactTemplate",
     "MinimalAgenticTemplate",
     "ExpoMobileTemplate",
+    "ExpoFullstackTemplate",
     "CustomProjectTemplate",
     "BUILTIN_TEMPLATES",
     "get_all_templates",
