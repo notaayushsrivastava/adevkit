@@ -53,7 +53,7 @@ APT::FTPArchive::Release::Components "main";
 EOF
 # Write the generated Release outside the indexed directory first. Redirecting
 # directly to dists/stable/Release causes apt-ftparchive to hash that file while
-# it is still being written, producing a self-referential and invalid entry.
+# it is still being written, producing a self-referential checksum entry.
 RELEASE_TMP="${OUTPUT_DIR}/Release.tmp"
 apt-ftparchive -c "${OUTPUT_DIR}/apt-ftparchive.conf" \
     release "${OUTPUT_DIR}/dists/stable" \
@@ -70,22 +70,7 @@ while IFS= read -r package_path; do
     fi
 done < <(awk '/^Filename: / { print $2 }' "${PACKAGES_INDEX}")
 
-if grep -Eq '^[[:xdigit:]]+[[:space:]]+[0-9]+[[:space:]]+Release
-
-GNUPGHOME="$(mktemp -d)"
-trap 'rm -rf "${GNUPGHOME}"' EXIT
-chmod 700 "${GNUPGHOME}"
-printf '%s\n' "${APT_GPG_PRIVATE_KEY}" | gpg --batch --import
-KEY_ID="$(gpg --batch --list-secret-keys --with-colons | awk -F: '$1 == "sec" { print $5; exit }')"
-gpg --batch --yes --local-user "${KEY_ID}" --armor \
-    --output "${OUTPUT_DIR}/dists/stable/InRelease" \
-    --clearsign "${OUTPUT_DIR}/dists/stable/Release"
-gpg --batch --yes --local-user "${KEY_ID}" \
-    --output "${OUTPUT_DIR}/dists/stable/Release.gpg" \
-    --detach-sign "${OUTPUT_DIR}/dists/stable/Release"
-gpg --batch --export "${KEY_ID}" \
-    > "${OUTPUT_DIR}/adevkit-archive-keyring.gpg"
- "${OUTPUT_DIR}/dists/stable/Release"; then
+if grep -Eq '^[[:xdigit:]]+[[:space:]]+[0-9]+[[:space:]]+Release$' "${OUTPUT_DIR}/dists/stable/Release"; then
     echo "Error: Release metadata contains a self-referential Release checksum." >&2
     exit 1
 fi
