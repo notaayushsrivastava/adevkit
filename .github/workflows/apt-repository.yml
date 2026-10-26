@@ -43,6 +43,33 @@ jobs:
           chmod +x installer/build_apt_repo.sh
           ./installer/build_apt_repo.sh "${{ steps.version.outputs.version }}" packages apt-repo
 
+      - name: Verify APT repository metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          packages_index="apt-repo/dists/stable/main/binary-amd64/Packages"
+          release_file="apt-repo/dists/stable/Release"
+          keyring="apt-repo/adevkit-archive-keyring.gpg"
+
+          package_path="$(awk '/^Filename: / { print $2; exit }' "$packages_index")"
+          test -n "$package_path"
+          case "$package_path" in
+            /*|apt-repo/*)
+              echo "Invalid APT Filename path: $package_path" >&2
+              exit 1
+              ;;
+          esac
+          test -f "apt-repo/$package_path"
+
+          if grep -Eq '^[[:xdigit:]]+[[:space:]]+[0-9]+[[:space:]]+Release$' "$release_file"; then
+            echo "Release metadata must not contain a checksum entry for itself." >&2
+            exit 1
+          fi
+
+          gpgv --keyring "$keyring" apt-repo/dists/stable/InRelease
+          gpgv --keyring "$keyring" apt-repo/dists/stable/Release.gpg "$release_file"
+          echo "APT package path and signatures verified."
+
       - name: Publish to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
