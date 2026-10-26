@@ -43,8 +43,8 @@ def get_all_templates() -> List[Dict]:
     for c in list_custom_templates():
         templates.append({
             "id": f"custom:{c['id']}",
-            "name": f"✨ {c['name']} (Custom)",
-            "short_name": f"✨ {c['name']} (Custom)",
+            "name": f"* {c['name']} (Custom)",
+            "short_name": f"* {c['name']} (Custom)",
             "description": c["description"],
             "category": "Custom",
             "is_custom": True,

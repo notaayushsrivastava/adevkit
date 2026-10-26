@@ -1,4 +1,4 @@
-# ⚡ Aayush's DevKit ⚡
+# Aayush's DevKit
 
 > **One-Command Project Scaffolding with Agentic Skills & Environment Setup**
 
@@ -6,7 +6,7 @@
 
 ---
 
-## 🚀 Features
+## Features
 
 - **Interactive Terminal UI**: Built with `Typer`, `Rich`, and `InquirerPy` featuring branded ASCII art, arrow-key navigation, live progress spinners, and status tables.
 - **10 Built-In Project Starters**:
@@ -42,10 +42,14 @@
 - **Intelligent Documentation**:
   - **`AGENTS.md`**: Injects tailored guidelines for AI assistants (Antigravity, Cursor, Claude Code, Gemini CLI), including anti-generic design rules and Vercel Server Component patterns when relevant skills are selected.
   - **`PRD.md`**: Guided prompt wizard, standardized comprehensive starter, or path-based import.
+- **Automatic Multi-Channel Update Checker**:
+  - Automatically identifies whether running as a Python package (`adevkit` via PyPI) or native Windows MSI installer (via GitHub Releases).
+  - Background, non-blocking check with 24-hour smart caching in `~/.aayush-devkit/update_cache.json`.
+  - Manual check command via `devkit check-update` (`--type python`, `--type msi`, or `--type all`).
 
 ---
 
-## 📦 Quick Start
+## Quick Start
 
 ### 1. Install via PyPI (Recommended)
 ```bash
@@ -57,7 +61,7 @@ devkit init
 ```
 
 ### 2. Windows Native MSI Installer
-Download and execute `AayushsDevKit-v0.1.0-x64.msi` from the [Releases](https://github.com/aayush/aayush-devkit/releases) tab. It automatically adds `devkit` to your system `PATH`.
+Download and execute `AayushsDevKit-v0.1.1-x64.msi` from the [Releases](https://github.com/aayush/aayush-devkit/releases) tab. It automatically adds `devkit` to your system `PATH`.
 
 ### 3. Run Directly from Source
 ```powershell
@@ -70,7 +74,7 @@ Or with Windows command script:
 
 ---
 
-## 🛠 Commands
+## Commands
 
 ### Initialize a New Project
 ```powershell
@@ -111,6 +115,17 @@ devkit skills add impeccable
 devkit skills update
 ```
 
+### Check for Updates
+```powershell
+# Check for updates for active installation channel (PyPI adevkit or GitHub MSI)
+devkit check-update
+
+# Force check specific channel or both
+devkit check-update --type python
+devkit check-update --type msi
+devkit check-update --type all
+```
+
 ### System Diagnostics
 ```powershell
 devkit info
@@ -118,7 +133,7 @@ devkit info
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 The test suite covers all 10 templates, custom template snapshots, skills installation, lockfile verification, and environment setup:
 
@@ -128,7 +143,7 @@ The test suite covers all 10 templates, custom template snapshots, skills instal
 
 ---
 
-## 🚀 CI/CD & Automated MSI Release
+## CI/CD & Automated MSI Release
 
 This repository includes a dedicated GitHub Actions workflow ([`.github/workflows/release.yml`](.github/workflows/release.yml)) that automates building and releasing the application.
 
@@ -138,7 +153,7 @@ This repository includes a dedicated GitHub Actions workflow ([`.github/workflow
 3. **WiX MSI Installer Packaging**: Uses WiX Toolset to produce `AayushsDevKit-v<version>-x64.msi`, which installs to `Program Files` and **configures the system `PATH` environment variable**.
 4. **PyPI Publishing (`adevkit`)**: Builds wheel & source tarball, and publishes automatically to PyPI via `pypa/gh-action-pypi-publish` using the GitHub secret `PYPI_API_TOKEN`.
 5. **Portable Zip & SHA256 Checksums**: Compresses `devkit.exe` into a portable `.zip` and generates `SHA256SUMS.txt`.
-6. **GitHub Release Publication**: Automatically publishes the release under the version tag specified in `pyproject.toml` (e.g., `v0.1.0`) with `.msi`, `.zip`, `.whl`, `.tar.gz`, and checksums.
+6. **GitHub Release Publication**: Automatically publishes the release under the version tag specified in `pyproject.toml` (e.g., `v0.1.1`) with `.msi`, `.zip`, `.whl`, `.tar.gz`, and checksums.
 
 ### Prerequisites for PyPI Publishing:
 Add your PyPI API token to your GitHub repository secrets:
@@ -148,12 +163,12 @@ Add your PyPI API token to your GitHub repository secrets:
 ### Triggering a Release:
 - **Pushing a tag**:
   ```powershell
-  git tag v0.1.0
-  git push origin v0.1.0
+  git tag v0.1.1
+  git push origin v0.1.1
   ```
 - **Manual Dispatch**: Go to the **Actions** tab on GitHub, select **Build & Release Aayush's DevKit**, and click **Run workflow**.
 
 ---
 
-## 📄 License
+## License
 MIT © Aayush

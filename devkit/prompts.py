@@ -55,7 +55,7 @@ def prompt_template_selection(templates: List[Dict]) -> str:
         box_w = max(34, min(76, tw - 4))
         inner_w = box_w - 4
 
-        header_text = f" ℹ {full_name} "
+        header_text = f" [i] {full_name} "
         if len(header_text) > inner_w - 4:
             header_text = header_text[: max(10, inner_w - 7)] + "... "
         top_dashes = max(2, box_w - 4 - len(header_text))

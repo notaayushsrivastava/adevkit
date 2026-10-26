@@ -6,6 +6,7 @@ from pathlib import Path
 USER_DEVKIT_DIR = Path.home() / ".aayush-devkit"
 USER_TEMPLATES_DIR = USER_DEVKIT_DIR / "templates"
 USER_CONFIG_FILE = USER_DEVKIT_DIR / "config.json"
+UPDATE_CACHE_FILE = USER_DEVKIT_DIR / "update_cache.json"
 
 # Package directory containing embedded default skills/templates
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):

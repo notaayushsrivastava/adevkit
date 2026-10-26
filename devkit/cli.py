@@ -47,6 +47,14 @@ from .scaffold import (
     setup_dotenv_file,
     setup_vscode_config,
 )
+from .updater import (
+    detect_installation_type,
+    check_for_updates,
+    check_pypi_update,
+    check_msi_update,
+    load_cached_update,
+    notify_update_if_available,
+)
 from .prompts import (
     prompt_project_name,
     prompt_template_selection,
@@ -58,7 +66,7 @@ from .prompts import (
 
 app = typer.Typer(
     name="devkit",
-    help="⚡ Aayush's DevKit - Single-command project initialization with Agentic skills and environments.",
+    help="Aayush's DevKit - Single-command project initialization with Agentic skills and environments.",
     add_completion=False,
 )
 
@@ -71,6 +79,7 @@ app.add_typer(skills_app, name="skills")
 @app.callback(invoke_without_command=True)
 def main_entry(ctx: typer.Context):
     """If no subcommand is passed, default to interactive init."""
+    notify_update_if_available()
     if ctx.invoked_subcommand is None:
         init()
 
@@ -296,7 +305,7 @@ def init(
                 warning(n_msg)
 
     # Final Celebration Message
-    section("🎉 Project Successfully Initialized!")
+    section("Project Successfully Initialized!")
     console.print(f"[bold green]Location:[/bold green] [underline]{dest_path}[/underline]")
     console.print("[bold yellow]Next Steps:[/bold yellow]")
     console.print(f"  1. [cyan]cd {dest_path.name}[/cyan]")
@@ -340,7 +349,7 @@ def template_save(
 def template_list():
     """List all built-in and custom saved templates."""
     templates = get_all_templates()
-    table = Table(title="📦 Available Project Templates", border_style="cyan")
+    table = Table(title="Available Project Templates", border_style="cyan")
     table.add_column("Template ID", style="bold yellow", width=18)
     table.add_column("Type", style="magenta", width=10)
     table.add_column("Name", style="white", width=35)
@@ -370,7 +379,7 @@ def template_delete(
 @skills_app.command(name="list")
 def skills_list():
     """List all available curated agent skills in DevKit."""
-    table = Table(title="🤖 Curated Agent Skills Catalog", border_style="green")
+    table = Table(title="Curated Agent Skills Catalog", border_style="green")
     table.add_column("Skill ID", style="bold yellow", width=22)
     table.add_column("Category", style="cyan", width=25)
     table.add_column("Description", style="white")
@@ -409,17 +418,94 @@ def skills_update():
         success(f"Successfully synced and indexed {len(refreshed)} agent skills in catalog.")
 
 
-# --- Info Command ---
+# --- Update & Info Commands ---
+
+@app.command(name="check-update")
+def check_update_command(
+    mode: Annotated[
+        Optional[str],
+        typer.Option("--type", "-t", help="Installation type to check ('python', 'msi', or 'all')"),
+    ] = None,
+):
+    """Check for latest updates for Aayush's DevKit via PyPI or GitHub MSI."""
+    target_mode = (mode or "").lower()
+
+    if target_mode == "all":
+        with console.status("[cyan]Checking PyPI and GitHub for updates...[/cyan]", spinner="dots"):
+            py_res = check_pypi_update(timeout=4.0)
+            msi_res = check_msi_update(timeout=4.0)
+
+        table = Table(title="Update Check Results", border_style="cyan")
+        table.add_column("Channel / Package", style="bold yellow", width=25)
+        table.add_column("Current Version", style="white", width=18)
+        table.add_column("Latest Version", style="magenta", width=18)
+        table.add_column("Status / Action", style="white")
+
+        if py_res:
+            py_status = "[bold green]Up to date[/bold green]" if not py_res["update_available"] else f"[bold yellow]Run: {py_res['update_command']}[/bold yellow]"
+            table.add_row("Python Package (adevkit)", py_res["current_version"], py_res["latest_version"], py_status)
+        else:
+            table.add_row("Python Package (adevkit)", __version__, "Unknown", "[red]Check failed[/red]")
+
+        if msi_res:
+            msi_status = "[bold green]Up to date[/bold green]" if not msi_res["update_available"] else f"[bold yellow]{msi_res['update_command']}[/bold yellow]"
+            table.add_row("Windows Native MSI", msi_res["current_version"], msi_res["latest_version"], msi_status)
+        else:
+            table.add_row("Windows Native MSI", __version__, "Unknown", "[red]Check failed[/red]")
+
+        console.print(table)
+        return
+
+    active_type = target_mode if target_mode in ("msi", "python") else detect_installation_type()
+    channel_name = "Windows Native MSI (GitHub Releases)" if active_type == "msi" else "Python Package (PyPI adevkit)"
+
+    with console.status(f"[cyan]Checking {channel_name} for updates...[/cyan]", spinner="dots"):
+        res = check_for_updates(force=True, mode=active_type, timeout=4.0)
+
+    if not res or not res.get("latest_version"):
+        error(f"Failed to fetch update information for {channel_name}. Please check your internet connection.")
+        return
+
+    curr = res.get("current_version", __version__)
+    latest = res.get("latest_version", "")
+    has_update = res.get("update_available", False)
+
+    if has_update:
+        info(f"Update available for {channel_name}: v{curr} -> v{latest}")
+        if active_type == "python":
+            console.print(f"  Run: [bold cyan]{res['update_command']}[/bold cyan]")
+        else:
+            console.print(f"  Download MSI installer: [bold cyan]{res['url']}[/bold cyan]")
+    else:
+        success(f"Aayush's DevKit is up to date (v{curr} via {channel_name}).")
+
 
 @app.command(name="info")
 def system_info():
     """Display environment diagnostics and detected tooling."""
     print_banner()
-    table = Table(title="🛠 System & Runtime Diagnostics", border_style="blue")
+    table = Table(title="System & Runtime Diagnostics", border_style="blue")
     table.add_column("Tool / Property", style="bold yellow", width=25)
     table.add_column("Status / Path", style="white")
 
     table.add_row("DevKit Version", __version__)
+
+    install_type = detect_installation_type()
+    table.add_row(
+        "Installation Type",
+        "Windows Native MSI / Executable" if install_type == "msi" else "Python Package (pip / adevkit)",
+    )
+
+    cached = load_cached_update()
+    if cached and cached.get("install_type") == install_type:
+        latest = cached.get("latest_version")
+        if cached.get("update_available"):
+            table.add_row("Update Status", f"[yellow]v{latest} available! (Run `devkit check-update`)[/yellow]")
+        else:
+            table.add_row("Update Status", f"[green]Up to date (v{__version__})[/green]")
+    else:
+        table.add_row("Update Status", "Run `devkit check-update` to verify")
+
     table.add_row("Python Executable", detect_python())
     table.add_row("Git Available", "Yes" if detect_git() else "No (Not in PATH)")
     

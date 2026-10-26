@@ -22,7 +22,7 @@ def print_banner():
     text = Text(BANNER_ART, style="bold cyan")
     panel = Panel(
         text,
-        title="[bold yellow]⚡ Aayush's DevKit ⚡[/bold yellow]",
+        title="[bold yellow]Aayush's DevKit[/bold yellow]",
         subtitle="[bold white]Single-Command Project Scaffolding & Agentic Environment Setup[/bold white]",
         border_style="bright_blue",
         padding=(0, 2),
@@ -31,23 +31,23 @@ def print_banner():
     console.print()
 
 def success(message: str):
-    console.print(f"[bold green]✔[/bold green] {message}")
+    console.print(f"[bold green][+][/bold green] {message}")
 
 def info(message: str):
-    console.print(f"[bold cyan]ℹ[/bold cyan] {message}")
+    console.print(f"[bold cyan][i][/bold cyan] {message}")
 
 def warning(message: str):
-    console.print(f"[bold yellow]⚠[/bold yellow] {message}")
+    console.print(f"[bold yellow][!][/bold yellow] {message}")
 
 def error(message: str):
-    console.print(f"[bold red]✖[/bold red] {message}")
+    console.print(f"[bold red][x][/bold red] {message}")
 
 def section(title: str):
     console.print(f"\n[bold magenta]─── {title} ───[/bold magenta]\n")
 
 def print_summary_table(project_name: str, target_dir: str, template: str, skills: list[str], prd_mode: str):
     """Print an aesthetic summary table of the project to be created."""
-    table = Table(title="🚀 Project Initialization Summary", border_style="cyan")
+    table = Table(title="Project Initialization Summary", border_style="cyan")
     table.add_column("Property", style="bold yellow", width=22)
     table.add_column("Value", style="white")
 

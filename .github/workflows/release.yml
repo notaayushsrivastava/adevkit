@@ -154,13 +154,13 @@ jobs:
             output/*.tar.gz
             output/SHA256SUMS.txt
           body: |
-            ## ⚡ Aayush's DevKit (${{ env.TAG_NAME }})
+            ## Aayush's DevKit (${{ env.TAG_NAME }})
             
             Single-command project scaffolding with Agentic skills (`.agents/skills/`), custom templates, and automated environment configuration.
             
             ---
             
-            ### 📦 Installation Options
+            ### Installation Options
             
             #### 1. Via PyPI (`pip install`)
             ```bash
@@ -181,7 +181,7 @@ jobs:
             
             ---
             
-            ### 🚀 Verification & Quick Start
+            ### Verification & Quick Start
             Open a new terminal and verify installation:
             ```powershell
             devkit info
@@ -194,7 +194,7 @@ jobs:
             
             ---
             
-            ### 🔐 Integrity Verification
+            ### Integrity Verification
             Verify downloads against **`SHA256SUMS.txt`**:
             ```powershell
             Get-FileHash -Algorithm SHA256 .\AayushsDevKit-v${{ env.VERSION }}-x64.msi
