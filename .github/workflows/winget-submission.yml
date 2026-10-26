@@ -101,31 +101,63 @@ jobs:
       - name: Submit Pull Request to microsoft/winget-pkgs
         shell: pwsh
         env:
-          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN || secrets.WINGET_CREATE_GITHUB_TOKEN }}
+          WINGET_TOKEN: \${{ secrets.WINGET_TOKEN || secrets.WINGET_CREATE_GITHUB_TOKEN }}
         run: |
           $packageId = "notaayushsrivastava.adevkit"
-          $msiUrl = "https://github.com/${{ github.repository }}/releases/download/$env:TAG_NAME/AayushsDevKit-v$env:VERSION-x64.msi"
+          $msiUrl = "https://github.com/\${{ github.repository }}/releases/download/$env:TAG_NAME/AayushsDevKit-v$env:VERSION-x64.msi"
+          $manifestDir = Join-Path $PWD "installer\winget\manifests\n\notaayushsrivastava\adevkit\$env:VERSION"
+
+          if (-not (Test-Path $manifestDir -PathType Container)) {
+            throw "Generated WinGet manifest directory was not found: $manifestDir"
+          }
+
+          $manifestFiles = @(Get-ChildItem -Path $manifestDir -Filter "*.yaml" -File)
+          if ($manifestFiles.Count -ne 3) {
+            throw "Expected exactly 3 WinGet YAML manifests in '$manifestDir'; found $($manifestFiles.Count)."
+          }
 
           if (-not $env:WINGET_TOKEN -or $env:WINGET_TOKEN.Trim() -eq "") {
             Write-Host "::warning::WINGET_TOKEN (or WINGET_CREATE_GITHUB_TOKEN) secret is not configured."
-            Write-Host "To enable automated WinGet submissions to microsoft/winget-pkgs:"
-            Write-Host "1. Create a GitHub Personal Access Token (Classic) with 'public_repo' and 'workflow' scopes."
-            Write-Host "2. Fork 'microsoft/winget-pkgs' to your GitHub account."
-            Write-Host "3. Add the token to Repository Settings -> Secrets and variables -> Actions as 'WINGET_TOKEN'."
-            Write-Host "WinGet manifests have been successfully validated and uploaded as artifacts in this run."
+            Write-Host "The generated WinGet manifests were validated and uploaded as an artifact."
+            Write-Host "Configure WINGET_TOKEN to enable automated submissions."
             exit 0
           }
 
           $env:WINGET_CREATE_GITHUB_TOKEN = $env:WINGET_TOKEN
-
-          Write-Host "Submitting package update for $packageId ($env:VERSION) to microsoft/winget-pkgs..." -ForegroundColor Cyan
-          try {
-            & .\wingetcreate.exe update $packageId --version "$env:VERSION" --urls "$msiUrl|x64" --token "$env:WINGET_TOKEN" --submit
-            if ($LASTEXITCODE -eq 0) {
-              Write-Host "[+] Successfully created Pull Request in microsoft/winget-pkgs!" -ForegroundColor Green
-            } else {
-              Write-Host "Notice: 'wingetcreate update' returned code $LASTEXITCODE. If this is the initial submission, submit the generated manifests from 'installer/winget/manifests' or run initial submission." -ForegroundColor Yellow
-            }
-          } catch {
-            Write-Host "Notice: Submission encountered: $_" -ForegroundColor Yellow
+          $packageManifestApi = "https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/n/notaayushsrivastava/adevkit"
+          $headers = @{
+            Accept = "application/vnd.github+json"
+            Authorization = "Bearer $env:WINGET_TOKEN"
+            "X-GitHub-Api-Version" = "2022-11-28"
+            "User-Agent" = "adevkit-winget-submission"
           }
+
+          # "update" requires an existing package manifest; use "submit" for the first release.
+          $packageExists = $false
+          try {
+            $null = Invoke-RestMethod -Uri $packageManifestApi -Headers $headers -Method Get -ErrorAction Stop
+            $packageExists = $true
+          } catch {
+            $statusCode = $null
+            if ($_.Exception.Response) {
+              try { $statusCode = [int]$_.Exception.Response.StatusCode } catch { }
+            }
+            if ($statusCode -ne 404) {
+              throw "Could not determine whether '$packageId' already exists in microsoft/winget-pkgs: $($_.Exception.Message)"
+            }
+          }
+
+          if ($packageExists) {
+            Write-Host "Existing WinGet package found; submitting update for $packageId ($env:VERSION)." -ForegroundColor Cyan
+            & .\wingetcreate.exe update $packageId --version "$env:VERSION" --urls "$msiUrl|x64" --token "$env:WINGET_TOKEN" --submit --no-open
+          } else {
+            Write-Host "No upstream manifest found; submitting the initial package manifest for $packageId ($env:VERSION)." -ForegroundColor Cyan
+            & .\wingetcreate.exe submit --prtitle "New package: $packageId version $env:VERSION" --token "$env:WINGET_TOKEN" --no-open "$manifestDir"
+          }
+
+          $submissionExitCode = $LASTEXITCODE
+          if ($submissionExitCode -ne 0) {
+            throw "wingetcreate submission failed with exit code $submissionExitCode."
+          }
+
+          Write-Host "[+] WinGet submission completed successfully." -ForegroundColor Green
