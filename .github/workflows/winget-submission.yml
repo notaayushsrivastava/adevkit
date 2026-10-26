@@ -101,10 +101,10 @@ jobs:
       - name: Submit Pull Request to microsoft/winget-pkgs
         shell: pwsh
         env:
-          WINGET_TOKEN: \${{ secrets.WINGET_TOKEN || secrets.WINGET_CREATE_GITHUB_TOKEN }}
+          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN || secrets.WINGET_CREATE_GITHUB_TOKEN }}
         run: |
           $packageId = "notaayushsrivastava.adevkit"
-          $msiUrl = "https://github.com/\${{ github.repository }}/releases/download/$env:TAG_NAME/AayushsDevKit-v$env:VERSION-x64.msi"
+          $msiUrl = "https://github.com/${{ github.repository }}/releases/download/$env:TAG_NAME/AayushsDevKit-v$env:VERSION-x64.msi"
           $manifestDir = Join-Path $PWD "installer\winget\manifests\n\notaayushsrivastava\adevkit\$env:VERSION"
 
           if (-not (Test-Path $manifestDir -PathType Container)) {
