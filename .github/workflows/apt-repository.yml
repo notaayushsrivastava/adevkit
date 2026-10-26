@@ -5,13 +5,19 @@ on:
     workflows: ["Build, Release & Publish adevkit"]
     types: [completed]
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Successful Build, Release & Publish adevkit run ID containing the linux-artifacts artifact"
+        required: true
+        type: string
 
 permissions:
   contents: write
 
 jobs:
   publish:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -22,7 +28,7 @@ jobs:
         with:
           name: linux-artifacts
           path: packages
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ github.event.workflow_run.id || inputs.source_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Determine package version
