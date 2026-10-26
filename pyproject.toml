@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aayush-devkit"
+version = "0.1.0"
+description = "Aayush's DevKit - Single command project initialisation with agent skills and environments"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "typer>=0.12.0",
+    "rich>=13.0.0",
+    "inquirerpy>=0.3.4",
+    "pyyaml>=6.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+devkit = "devkit.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["devkit*"]
