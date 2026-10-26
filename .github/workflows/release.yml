@@ -2,12 +2,17 @@ name: Build, Release & Publish adevkit
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*.*.*'
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       release_version:
-        description: 'Version tag override (e.g. 0.1.0). Leave empty to read from pyproject.toml'
+        description: 'Version tag override (e.g. 0.1.1). Leave empty to read from pyproject.toml'
         required: false
         default: ''
 
@@ -44,6 +49,7 @@ jobs:
   build-and-release:
     name: Build Standalone Executable, MSI & Publish GitHub Release
     needs: test
+    if: github.event_name != 'pull_request'
     runs-on: windows-latest
 
     steps:
@@ -73,12 +79,12 @@ jobs:
             if ($content -match 'version\s*=\s*["'']([^"'']+)["'']') {
               $version = $matches[1]
             } else {
-              $version = "0.1.0"
+              $version = "0.1.1"
             }
           }
           Write-Host "Determined Release Version: $version" -ForegroundColor Green
-          echo "VERSION=$version" >> $env:GITHUB_ENV
-          echo "TAG_NAME=v$version" >> $env:GITHUB_ENV
+          "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "TAG_NAME=v$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Install Packaging Dependencies
         run: |
@@ -204,6 +210,7 @@ jobs:
   publish-pypi:
     name: Build & Publish Package to PyPI (adevkit)
     needs: test
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code

@@ -45,7 +45,15 @@ def error(message: str):
 def section(title: str):
     console.print(f"\n[bold magenta]─── {title} ───[/bold magenta]\n")
 
-def print_summary_table(project_name: str, target_dir: str, template: str, skills: list[str], prd_mode: str):
+def print_summary_table(
+    project_name: str,
+    target_dir: str,
+    template: str,
+    skills: list[str],
+    prd_mode: str,
+    agents: list[str] | None = None,
+    readme_style: str | None = None,
+):
     """Print an aesthetic summary table of the project to be created."""
     table = Table(title="Project Initialization Summary", border_style="cyan")
     table.add_column("Property", style="bold yellow", width=22)
@@ -54,7 +62,9 @@ def print_summary_table(project_name: str, target_dir: str, template: str, skill
     table.add_row("Project Name", project_name)
     table.add_row("Target Directory", target_dir)
     table.add_row("Template", template)
+    table.add_row("AI Agents", ", ".join(agents) if agents else "Antigravity (Default)")
     table.add_row("Skills Selected", ", ".join(skills) if skills else "None")
+    table.add_row("README Style", readme_style or "Modern (Default)")
     table.add_row("PRD Mode", prd_mode)
 
     console.print(table)

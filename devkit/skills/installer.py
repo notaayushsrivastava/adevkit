@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 from .catalog import AVAILABLE_SKILLS, SkillInfo
-from ..config import EMBEDDED_SKILLS_DIR
+from ..config import EMBEDDED_SKILLS_DIR, USER_SKILLS_DIR
 
 def _compute_sha256(file_path: Path) -> str:
     """Compute sha256 hash of a file."""
@@ -53,6 +53,8 @@ def install_skills(target_dir: Path, skill_ids: List[str]) -> Dict[str, Any]:
     for sid in skill_ids:
         skill_info = AVAILABLE_SKILLS.get(sid)
         src_skill_dir = EMBEDDED_SKILLS_DIR / sid
+        if not src_skill_dir.exists() and (USER_SKILLS_DIR / sid).exists():
+            src_skill_dir = USER_SKILLS_DIR / sid
 
         dest_skill_dir = skills_dir / sid
         dest_skill_dir.mkdir(parents=True, exist_ok=True)

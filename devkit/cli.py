@@ -57,6 +57,23 @@ from .scaffold import (
     setup_node_environment,
     setup_dotenv_file,
     setup_vscode_config,
+    scaffold_agent_configs,
+    SUPPORTED_AGENTS,
+)
+from .vault import (
+    get_config,
+    set_config,
+    delete_config,
+    list_configs,
+    get_default_agents,
+    set_default_agents,
+    _is_sensitive_key,
+)
+from .skills.custom import (
+    add_custom_skill,
+    create_custom_skill,
+    remove_custom_skill,
+    list_custom_skills,
 )
 from .updater import (
     detect_installation_type,
@@ -71,20 +88,35 @@ from .prompts import (
     prompt_template_selection,
     prompt_expo_backend_stack,
     prompt_skills_selection,
+    prompt_agents_selection,
+    prompt_readme_template,
     prompt_prd_mode,
     prompt_env_options,
 )
+from .readmes import (
+    list_readme_templates,
+    get_readme_template,
+    save_custom_readme,
+    delete_custom_readme,
+    generate_project_readme,
+)
 
 app = typer.Typer(
-    name="devkit",
-    help="Aayush's DevKit - Single-command project initialization with Agentic skills and environments.",
+    name="adevkit",
+    help="adevkit (Aayush's DevKit) - Single-command project initialization with Agentic skills, AI agents, and environments.",
     add_completion=False,
 )
 
 template_app = typer.Typer(help="Manage and save custom reusable templates.")
-skills_app = typer.Typer(help="Inspect and install agent skills.")
+skills_app = typer.Typer(help="Inspect, create, and install agent skills (like skills.sh).")
+config_app = typer.Typer(help="Manage secure configuration vault and AI agent defaults.")
+
+readme_app = typer.Typer(help="Manage and customize project README.md templates.")
+
 app.add_typer(template_app, name="template")
 app.add_typer(skills_app, name="skills")
+app.add_typer(config_app, name="config")
+app.add_typer(readme_app, name="readme")
 
 
 @app.callback(invoke_without_command=True)
@@ -113,6 +145,14 @@ def init(
         Optional[List[str]],
         typer.Option("--skill", "-s", help="Skill ID(s) to install"),
     ] = None,
+    agents: Annotated[
+        Optional[List[str]],
+        typer.Option("--agent", "-a", help="Target AI agent ID(s) (e.g. antigravity, cursor, claude, copilot, windsurf, aider)"),
+    ] = None,
+    readme: Annotated[
+        Optional[str],
+        typer.Option("--readme", "-r", help="README template style (modern, minimal, enterprise, agentic, custom:<NAME>, or skip)"),
+    ] = None,
     yes: Annotated[
         bool,
         typer.Option("--yes", "-y", help="Skip interactive prompts and use defaults"),
@@ -128,6 +168,10 @@ def init(
         template = None
     if skills is not None and not isinstance(skills, list):
         skills = None
+    if agents is not None and not isinstance(agents, list):
+        agents = None
+    if readme is not None and not isinstance(readme, str):
+        readme = None
     if not isinstance(yes, bool):
         yes = False
 
@@ -191,6 +235,18 @@ def init(
     else:
         chosen_skills = skills
 
+    # 3b. AI Agents Selection
+    if yes or agents:
+        chosen_agents = agents or get_default_agents()
+    else:
+        chosen_agents = prompt_agents_selection(default_agents=agents)
+
+    # 3c. README Template Selection
+    if yes or readme:
+        chosen_readme = (readme or "modern").lower()
+    else:
+        chosen_readme = prompt_readme_template(list_readme_templates())
+
     # 4. PRD Mode Selection
     if yes:
         prd_config = {"mode": "quick", "overview": "", "target_users": "", "core_features": ""}
@@ -216,6 +272,8 @@ def init(
         template=template_info["name"],
         skills=chosen_skills,
         prd_mode=prd_config["mode"],
+        agents=chosen_agents,
+        readme_style=chosen_readme,
     )
 
     if not yes:
@@ -251,17 +309,33 @@ def init(
             skill_res = install_skills(dest_path, chosen_skills)
             success(f"Installed {len(skill_res['installed'])} agent skill(s) into .agents/skills/")
 
-    # C. AGENTS.md
-    with console.status("[cyan]Generating customized AGENTS.md...[/cyan]", spinner="dots"):
-        generate_agents_md(
+    # C. AI Agent Configurations (AGENTS.md, Cursor, Claude Code, Copilot, etc.)
+    with console.status("[cyan]Generating customized AI Agent configurations...[/cyan]", spinner="dots"):
+        agent_files = scaffold_agent_configs(
             target_dir=dest_path,
             project_name=project_name,
             template_id=chosen_template_id,
             installed_skills=chosen_skills,
+            selected_agents=chosen_agents,
         )
-        success("Created AGENTS.md with architecture & agent instructions.")
+        success(f"Configured {len(agent_files)} AI agent guideline(s): {', '.join(chosen_agents)}")
 
-    # D. PRD.md
+    # D. README.md
+    if chosen_readme != "skip":
+        with console.status(f"[cyan]Generating {chosen_readme} README.md...[/cyan]", spinner="dots"):
+            readme_ctx = {
+                "project_name": project_name,
+                "template_id": chosen_template_id,
+                "template_name": template_info["name"],
+                "description": prd_config.get("overview") or template_info.get("description", ""),
+                "author": get_config("default_author", "Developer"),
+                "skills": chosen_skills,
+                "agents": chosen_agents,
+            }
+            generate_project_readme(dest_path, template_style=chosen_readme, context=readme_ctx)
+            success(f"Generated customized README.md ({chosen_readme} style).")
+
+    # E. PRD.md
     if prd_config["mode"] == "generate":
         with console.status("[cyan]Generating PRD.md...[/cyan]", spinner="dots"):
             generate_prd_template(
@@ -403,21 +477,79 @@ def skills_list():
 
 @skills_app.command(name="add")
 def skills_add(
-    skill_name: Annotated[str, typer.Argument(help="ID of the skill to install")],
+    source: Annotated[str, typer.Argument(help="Skill ID, GitHub repo (owner/repo or URL), or local path to install")],
     target: Annotated[
         Optional[str],
         typer.Option("--target", "-t", help="Target project root directory (defaults to current dir)"),
     ] = None,
+    is_global: Annotated[
+        bool,
+        typer.Option("--global", "-g", help="Install into global user skills store (~/.adevkit/skills/) for all projects"),
+    ] = False,
+    name: Annotated[
+        Optional[str],
+        typer.Option("--name", "-n", help="Custom alias or override name for the skill"),
+    ] = None,
 ):
-    """Install an agent skill into the target project's .agents/skills/."""
+    """Add a skill from local path, GitHub repository/shorthand, URL, or catalog (like skills.sh)."""
     target_path = Path(target).resolve() if target else Path.cwd()
-    if skill_name not in AVAILABLE_SKILLS:
-        error(f"Skill '{skill_name}' not found in catalog. Run `devkit skills list` to view options.")
-        raise typer.Exit(1)
+    with console.status(f"[cyan]Adding skill '{source}'...[/cyan]", spinner="dots"):
+        try:
+            res = add_custom_skill(
+                source=source,
+                target_dir=target_path,
+                is_global=is_global,
+                custom_name=name,
+            )
+            scope = "globally (~/.adevkit/skills/)" if is_global else f"into {res['destination']}"
+            success(f"Successfully added skill '{res['skill_id']}' {scope}")
+        except Exception as e:
+            error(f"Failed to add skill '{source}': {e}")
+            raise typer.Exit(1)
 
-    with console.status(f"[cyan]Installing {skill_name}...[/cyan]", spinner="dots"):
-        res = install_skills(target_path, [skill_name])
-        success(f"Installed '{skill_name}' into {res['skills_dir']}")
+
+@skills_app.command(name="create")
+def skills_create(
+    name: Annotated[str, typer.Argument(help="Name of the new skill to scaffold")],
+    target: Annotated[
+        Optional[str],
+        typer.Option("--target", "-t", help="Target project root directory (defaults to current dir)"),
+    ] = None,
+    is_global: Annotated[
+        bool,
+        typer.Option("--global", "-g", help="Create in global user skills store (~/.adevkit/skills/)"),
+    ] = False,
+    description: Annotated[
+        str,
+        typer.Option("--desc", "-d", help="Short description of what the skill does"),
+    ] = "",
+):
+    """Scaffold a new custom agent skill (SKILL.md & references/)."""
+    target_path = Path(target).resolve() if target else Path.cwd()
+    dest = create_custom_skill(name=name, target_dir=target_path, is_global=is_global, description=description)
+    scope = "globally (~/.adevkit/skills/)" if is_global else f"in {dest}"
+    success(f"Custom skill '{name}' created {scope}")
+
+
+@skills_app.command(name="remove")
+def skills_remove(
+    name: Annotated[str, typer.Argument(help="Name of the custom skill to remove")],
+    target: Annotated[
+        Optional[str],
+        typer.Option("--target", "-t", help="Target project root directory (defaults to current dir)"),
+    ] = None,
+    is_global: Annotated[
+        bool,
+        typer.Option("--global", "-g", help="Remove from global user skills store"),
+    ] = False,
+):
+    """Remove a custom agent skill."""
+    target_path = Path(target).resolve() if target else Path.cwd()
+    removed = remove_custom_skill(name=name, target_dir=target_path, is_global=is_global)
+    if removed:
+        success(f"Skill '{name}' removed successfully.")
+    else:
+        error(f"Skill '{name}' not found.")
 
 
 @skills_app.command(name="update")
@@ -427,6 +559,167 @@ def skills_update():
         from .skills.catalog import load_all_skills
         refreshed = load_all_skills()
         success(f"Successfully synced and indexed {len(refreshed)} agent skills in catalog.")
+
+
+# --- README Commands ---
+
+@readme_app.command(name="list")
+def readme_list():
+    """List all available built-in and user-custom README templates."""
+    templates = list_readme_templates()
+    table = Table(title="Available README Templates", border_style="cyan")
+    table.add_column("Template ID", style="bold yellow", width=18)
+    table.add_column("Type", style="magenta", width=10)
+    table.add_column("Name", style="white", width=32)
+    table.add_column("Description", style="dim")
+
+    for t in templates:
+        tmpl_type = "Custom" if t["is_custom"] else "Built-in"
+        table.add_row(t["id"], tmpl_type, t["name"], t["description"])
+
+    console.print(table)
+
+
+@readme_app.command(name="save")
+def readme_save(
+    name: Annotated[str, typer.Argument(help="Name for the custom README template")],
+    path: Annotated[
+        Optional[str],
+        typer.Option("--path", "-p", help="Path to markdown file (defaults to current dir README.md)"),
+    ] = None,
+    content: Annotated[
+        Optional[str],
+        typer.Option("--content", "-c", help="Inline markdown content for the template"),
+    ] = None,
+):
+    """Save a custom reusable README.md template to ~/.adevkit/readmes/."""
+    if content:
+        raw_text = content
+    else:
+        src = Path(path).resolve() if path else Path.cwd() / "README.md"
+        if not src.exists():
+            error(f"README source file does not exist: {src}")
+            raise typer.Exit(1)
+        raw_text = src.read_text(encoding="utf-8", errors="ignore")
+
+    saved_path = save_custom_readme(name=name, content_or_path=raw_text)
+    success(f"Custom README template '{name}' saved successfully at: {saved_path}")
+
+
+@readme_app.command(name="show")
+def readme_show(
+    name: Annotated[str, typer.Argument(help="Template ID (e.g. modern, minimal, enterprise, agentic, custom:<NAME>)")],
+):
+    """Preview a README template's raw content."""
+    text = get_readme_template(name)
+    console.print(Panel(text, title=f"README Template: {name}", border_style="cyan"))
+
+
+@readme_app.command(name="delete")
+def readme_delete(
+    name: Annotated[str, typer.Argument(help="Name of the custom README template to delete")],
+):
+    """Delete a user-saved custom README template."""
+    if delete_custom_readme(name):
+        success(f"Custom README template '{name}' deleted.")
+    else:
+        error(f"Custom README template '{name}' not found.")
+
+
+@readme_app.command(name="generate")
+def readme_generate(
+    style: Annotated[str, typer.Option("--style", "-s", help="Template style to use")] = "modern",
+    target: Annotated[
+        Optional[str],
+        typer.Option("--target", "-t", help="Target project root directory (defaults to current dir)"),
+    ] = None,
+    name: Annotated[
+        Optional[str],
+        typer.Option("--name", "-n", help="Project name override"),
+    ] = None,
+):
+    """Generate or overwrite README.md for an existing project folder."""
+    target_path = Path(target).resolve() if target else Path.cwd()
+    proj_name = name or target_path.name
+    ctx = {
+        "project_name": proj_name,
+        "template_id": "custom",
+        "template_name": "Project",
+        "description": f"Documentation for {proj_name}.",
+        "author": get_config("default_author", "Developer"),
+    }
+    dest = generate_project_readme(target_path, template_style=style, context=ctx)
+    success(f"Generated {dest} using '{style}' template.")
+
+
+# --- Config Commands ---
+
+@config_app.command(name="list")
+def config_list(
+    reveal: Annotated[bool, typer.Option("--reveal", "-r", help="Reveal decrypted secret values")] = False,
+):
+    """List all configured settings and secrets (secrets masked by default)."""
+    configs = list_configs(reveal_secrets=reveal)
+    if not configs:
+        info("No configurations found in vault (~/.adevkit/vault.json).")
+        return
+
+    table = Table(title="Secure Configuration Vault", border_style="cyan")
+    table.add_column("Key", style="bold yellow", width=25)
+    table.add_column("Value", style="white")
+
+    for k, v in configs.items():
+        table.add_row(k, str(v))
+
+    console.print(table)
+
+
+@config_app.command(name="set")
+def config_set_cmd(
+    key: Annotated[str, typer.Argument(help="Configuration key (e.g. anthropic_api_key, default_agents)")],
+    value: Annotated[str, typer.Argument(help="Value to store securely")],
+    secret: Annotated[Optional[bool], typer.Option("--secret/--no-secret", help="Explicitly mark as secret/plaintext")] = None,
+):
+    """Securely store a configuration value or secret in the vault."""
+    set_config(key, value, secret=secret)
+    success(f"Stored '{key}' in secure vault.")
+
+
+@config_app.command(name="get")
+def config_get_cmd(
+    key: Annotated[str, typer.Argument(help="Configuration key to retrieve")],
+    reveal: Annotated[bool, typer.Option("--reveal", "-r", help="Reveal unmasked value")] = False,
+):
+    """Retrieve a value from the secure configuration vault."""
+    val = get_config(key)
+    if val is None:
+        error(f"Key '{key}' not found in vault.")
+        raise typer.Exit(1)
+    if _is_sensitive_key(key) and not reveal and isinstance(val, str):
+        masked = f"{val[:4]}...{val[-4:]} [encrypted]" if len(val) > 8 else "*** [encrypted]"
+        console.print(f"[bold yellow]{key}:[/bold yellow] {masked}")
+    else:
+        console.print(f"[bold yellow]{key}:[/bold yellow] {val}")
+
+
+@config_app.command(name="delete")
+def config_delete_cmd(
+    key: Annotated[str, typer.Argument(help="Configuration key to remove")],
+):
+    """Remove a key from the secure configuration vault."""
+    if delete_config(key):
+        success(f"Deleted '{key}' from vault.")
+    else:
+        error(f"Key '{key}' not found in vault.")
+
+
+@config_app.command(name="set-agents")
+def config_set_agents_cmd(
+    agents: Annotated[List[str], typer.Argument(help="List of default AI agent IDs (e.g. antigravity cursor claude)")],
+):
+    """Set global default AI agents for new project scaffolding."""
+    set_default_agents(agents)
+    success(f"Updated default AI agents to: {', '.join(agents)}")
 
 
 # --- Update & Info Commands ---

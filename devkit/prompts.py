@@ -93,6 +93,27 @@ def prompt_expo_backend_stack() -> str:
         default="fastapi",
     ).execute()
 
+def prompt_agents_selection(default_agents: Optional[List[str]] = None) -> List[str]:
+    """Prompt the user to select target AI coding assistants for the project."""
+    from .scaffold.agent_configs import SUPPORTED_AGENTS
+    from .vault import get_default_agents
+
+    defaults = default_agents if default_agents is not None else get_default_agents()
+    choices = [
+        Choice(
+            value=aid,
+            name=desc,
+            enabled=(aid in defaults),
+        )
+        for aid, desc in SUPPORTED_AGENTS.items()
+    ]
+
+    return inquirer.checkbox(
+        message="Select target AI Coding Agents / Assistants (Space to toggle, Enter to confirm):",
+        choices=choices,
+        cycle=True,
+    ).execute()
+
 def prompt_skills_selection(
     available_skills: Dict[str, Any],
     recommended_skills: List[str],
@@ -123,6 +144,23 @@ def prompt_skills_selection(
         max_height=max(6, min(12, term_size.lines - 8)),
         wrap_lines=False,
         cycle=True,
+    ).execute()
+
+def prompt_readme_template(templates: List[Dict[str, Any]]) -> str:
+    """Prompt the user to select their preferred README.md style."""
+    choices = [
+        Choice(
+            value=t["id"],
+            name=f"{t['name']} - {t['description']}",
+        )
+        for t in templates
+    ]
+    choices.append(Choice(value="skip", name="Skip README.md generation"))
+
+    return inquirer.select(
+        message="Select README.md template style:",
+        choices=choices,
+        default="modern",
     ).execute()
 
 def prompt_prd_mode() -> Dict[str, Any]:

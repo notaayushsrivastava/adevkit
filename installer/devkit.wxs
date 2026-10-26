@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?ifndef Version?>
+    <?define Version = "0.1.1" ?>
+  <?endif?>
   <?define ProductVersion = "$(var.Version)" ?>
   <?define Manufacturer = "Aayush" ?>
-  <?define ProductName = "Aayush's DevKit" ?>
+  <?define ProductName = "adevkit" ?>
   <?define UpgradeCode = "e8f4a180-2a8e-4a65-8b3d-71b56a938c41" ?>
 
   <Product

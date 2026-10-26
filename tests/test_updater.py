@@ -68,11 +68,11 @@ def test_check_pypi_update_success():
 def test_check_msi_update_success():
     fake_response = {
         "tag_name": "v0.2.0",
-        "html_url": "https://github.com/aayush/aayush-devkit/releases/tag/v0.2.0",
+        "html_url": "https://github.com/notaayushsrivastava/adevkit/releases/tag/v0.2.0",
         "assets": [
             {
                 "name": "AayushsDevKit-v0.2.0-x64.msi",
-                "browser_download_url": "https://github.com/aayush/aayush-devkit/releases/download/v0.2.0/AayushsDevKit-v0.2.0-x64.msi",
+                "browser_download_url": "https://github.com/notaayushsrivastava/adevkit/releases/download/v0.2.0/AayushsDevKit-v0.2.0-x64.msi",
             }
         ],
     }

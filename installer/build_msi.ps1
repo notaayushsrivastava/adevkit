@@ -1,13 +1,31 @@
 param(
-    [string]$Version = "0.1.1",
+    [string]$Version,
     [string]$DistDir = "dist",
     [string]$OutputDir = "output"
 )
 
 $ErrorActionPreference = "Stop"
 
+# Auto-detect version if not supplied or empty
+if (-not $Version -or $Version.Trim() -eq "") {
+    if (Test-Path "pyproject.toml") {
+        $content = Get-Content "pyproject.toml" -Raw
+        if ($content -match 'version\s*=\s*["'']([^"'']+)["'']') {
+            $Version = $matches[1]
+        }
+    }
+}
+if (-not $Version) {
+    $Version = "0.1.1"
+}
+$Version = $Version.Trim().TrimStart('v')
+# WiX requires x.x.x or x.x.x.x
+if ($Version -notmatch '^\d+(\.\d+){1,3}$') {
+    $Version = "0.1.1"
+}
+
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "Building MSI Installer for Aayush's DevKit v$Version" -ForegroundColor Cyan
+Write-Host "Building MSI Installer for adevkit v$Version" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 
 # Ensure output directory exists
@@ -29,19 +47,44 @@ if ($wixV4) {
         -d Version=$Version `
         -d SourceDir=$SourceDir `
         -o $MsiOutput
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "wix build failed with exit code $LASTEXITCODE"
+        exit $LASTEXITCODE
+    }
 } elseif ($candle -and $light) {
     Write-Host "Using WiX v3 Toolset (candle + light)..." -ForegroundColor Green
     $ObjDir = Join-Path $OutputDir "obj"
     New-Item -ItemType Directory -Path $ObjDir -Force | Out-Null
     
     $WixObj = Join-Path $ObjDir "devkit.wixobj"
-    & candle.exe -arch x64 "installer\devkit.wxs" `
-        -dVersion=$Version `
-        -dSourceDir=$SourceDir `
-        -out $WixObj
-        
-    & light.exe -sval $WixObj `
-        -out $MsiOutput
+    
+    $candleArgs = @(
+        "-nologo",
+        "-arch", "x64",
+        "-dVersion=$Version",
+        "-dSourceDir=$SourceDir",
+        "-out", $WixObj,
+        "installer\devkit.wxs"
+    )
+    Write-Host "Invoking candle with Version=$Version" -ForegroundColor Cyan
+    & candle.exe @candleArgs
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "candle.exe failed with exit code $LASTEXITCODE"
+        exit $LASTEXITCODE
+    }
+
+    $lightArgs = @(
+        "-nologo",
+        "-sval",
+        $WixObj,
+        "-out", $MsiOutput
+    )
+    Write-Host "Invoking light to link MSI..." -ForegroundColor Cyan
+    & light.exe @lightArgs
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "light.exe failed with exit code $LASTEXITCODE"
+        exit $LASTEXITCODE
+    }
 } else {
     Write-Error "Neither WiX v4 (wix.exe) nor WiX v3 (candle.exe/light.exe) found in PATH. Install WiX Toolset to build .msi."
     exit 1

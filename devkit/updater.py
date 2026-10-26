@@ -13,7 +13,7 @@ from .config import UPDATE_CACHE_FILE, ensure_user_dirs
 
 CACHE_TTL_SECONDS = 86400  # 24 hours
 PYPI_API_URL = "https://pypi.org/pypi/adevkit/json"
-GITHUB_RELEASES_URL = "https://api.github.com/repos/aayush/aayush-devkit/releases/latest"
+GITHUB_RELEASES_URL = "https://api.github.com/repos/notaayushsrivastava/adevkit/releases/latest"
 
 
 def detect_installation_type() -> str:
@@ -109,7 +109,7 @@ def check_msi_update(current_version: str = __version__, timeout: float = 2.0) -
                             msi_download_url = asset.get("browser_download_url")
                             break
 
-                    release_url = data.get("html_url") or "https://github.com/aayush/aayush-devkit/releases/latest"
+                    release_url = data.get("html_url") or "https://github.com/notaayushsrivastava/adevkit/releases/latest"
                     download_url = msi_download_url or release_url
                     
                     return {

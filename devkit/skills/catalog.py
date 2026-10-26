@@ -3,7 +3,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Dict, Optional
-from ..config import EMBEDDED_SKILLS_DIR
+from ..config import EMBEDDED_SKILLS_DIR, USER_SKILLS_DIR
 
 @dataclass
 class SkillInfo:
@@ -118,6 +118,21 @@ def load_all_skills() -> Dict[str, SkillInfo]:
                     source=source,
                     source_type=source_type,
                     recommended_for=recs,
+                )
+
+    if USER_SKILLS_DIR.exists():
+        for item in sorted(USER_SKILLS_DIR.iterdir()):
+            if item.is_dir() and item.name not in skills:
+                sid = item.name
+                name, desc = _extract_skill_meta(sid, item)
+                skills[sid] = SkillInfo(
+                    id=sid,
+                    name=f"* {name} (Custom)",
+                    description=desc,
+                    category="Custom User Skills",
+                    source=f"user/{sid}",
+                    source_type="custom",
+                    recommended_for=[],
                 )
 
     return skills

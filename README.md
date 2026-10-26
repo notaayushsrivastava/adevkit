@@ -1,8 +1,8 @@
-# Aayush's DevKit
+# adevkit (Aayush's DevKit)
 
-> **One-Command Project Scaffolding with Agentic Skills & Environment Setup**
+> **One-Command Project Scaffolding with Agentic Skills, AI Assistant Guidelines & Environment Setup**
 
-**Aayush's DevKit** is a fast, interactive developer toolkit CLI designed to initialize production-ready projects in seconds. It handles everything: asking project names, generating tailored codebases, auto-installing curated AI agent skills, creating comprehensive `AGENTS.md` and `PRD.md` documentation, and setting up isolated Python virtual environments, Git, Node packages, and VSCode settings.
+**adevkit** (Aayush's DevKit) is a fast, interactive developer toolkit CLI designed to initialize production-ready projects in seconds. It handles everything: asking project names, generating tailored codebases, selecting target AI coding assistants (Antigravity, Cursor, Claude Code, GitHub Copilot, Windsurf, Aider), auto-installing curated and custom AI agent skills (like `skills.sh`), creating comprehensive specifications, securely storing API credentials (with Windows DPAPI encryption), and setting up isolated Python virtual environments, Git, Node packages, and VSCode settings.
 
 ---
 
@@ -42,6 +42,7 @@
 - **Intelligent Documentation**:
   - **`AGENTS.md`**: Injects tailored guidelines for AI assistants (Antigravity, Cursor, Claude Code, Gemini CLI), including anti-generic design rules and Vercel Server Component patterns when relevant skills are selected.
   - **`PRD.md`**: Guided prompt wizard, standardized comprehensive starter, or path-based import.
+  - **`README.md` Templates**: Choose from 4 built-in styles (`modern`, `minimal`, `enterprise`, `agentic`) or create and save reusable custom templates in `~/.adevkit/readmes/` with dynamic placeholder interpolation.
 - **Automatic Multi-Channel Update Checker**:
   - Automatically identifies whether running as a Python package (`adevkit` via PyPI) or native Windows MSI installer (via GitHub Releases).
   - Background, non-blocking check with 24-hour smart caching in `~/.aayush-devkit/update_cache.json`.
@@ -61,7 +62,7 @@ devkit init
 ```
 
 ### 2. Windows Native MSI Installer
-Download and execute `AayushsDevKit-v0.1.1-x64.msi` from the [Releases](https://github.com/aayush/aayush-devkit/releases) tab. It automatically adds `devkit` to your system `PATH`.
+Download and execute `AayushsDevKit-v0.1.1-x64.msi` from the [Releases](https://github.com/notaayushsrivastava/adevkit/releases) tab. It automatically adds `devkit` to your system `PATH`.
 
 ### 3. Run Directly from Source
 ```powershell
@@ -103,32 +104,83 @@ devkit template list
 devkit template delete my-starter
 ```
 
-### Manage Agent Skills
+### Manage Agent Skills (skills.sh compatible)
 ```powershell
-# List curated skill catalog
-devkit skills list
+# List curated and user-added custom skills
+adevkit skills list
 
-# Install a skill into the current project
-devkit skills add impeccable
+# Install a skill from the curated catalog into current project
+adevkit skills add impeccable
 
-# Sync and reload skills catalog
-devkit skills update
+# Install any skill from GitHub repo or shorthand (like skills.sh)
+adevkit skills add owner/repo
+adevkit skills add https://github.com/owner/repo/tree/main/path/to/skill
+
+# Install a skill from a local folder or raw SKILL.md URL
+adevkit skills add ./my-local-skill
+adevkit skills add https://example.com/SKILL.md
+
+# Install globally to ~/.adevkit/skills/ (available in every project)
+adevkit skills add ./team-standards --global
+
+# Scaffold a brand new custom skill template
+adevkit skills create my-custom-skill --desc "Custom guidelines"
+
+# Remove a custom skill
+adevkit skills remove my-custom-skill --global
+```
+
+### Customizable README Templates
+```powershell
+# List available built-in and user-custom README templates
+adevkit readme list
+
+# Save a custom reusable README template
+adevkit readme save my-org-readme --path ./my-template.md
+
+# Preview a README template
+adevkit readme show enterprise
+
+# Generate or regenerate README for any folder
+adevkit readme generate --style enterprise --target ./my-project
+
+# Delete a custom README template
+adevkit readme delete my-org-readme
+```
+
+### Secure Configuration & AI Agent Defaults
+```powershell
+# View configured settings (secrets are masked by default)
+adevkit config list
+
+# Store API keys securely (Windows DPAPI / POSIX host encryption)
+adevkit config set anthropic_api_key "sk-ant-..."
+adevkit config set openai_api_key "sk-proj-..."
+
+# Configure global default AI coding assistants for project scaffolding
+adevkit config set-agents antigravity cursor claude copilot
+
+# Retrieve a value (optionally reveal unmasked secret)
+adevkit config get anthropic_api_key --reveal
+
+# Delete a configuration key
+adevkit config delete openai_api_key
 ```
 
 ### Check for Updates
 ```powershell
 # Check for updates for active installation channel (PyPI adevkit or GitHub MSI)
-devkit check-update
+adevkit check-update
 
 # Force check specific channel or both
-devkit check-update --type python
-devkit check-update --type msi
-devkit check-update --type all
+adevkit check-update --type python
+adevkit check-update --type msi
+adevkit check-update --type all
 ```
 
 ### System Diagnostics
 ```powershell
-devkit info
+adevkit info
 ```
 
 ---
