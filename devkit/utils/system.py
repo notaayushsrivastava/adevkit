@@ -28,6 +28,10 @@ def detect_git() -> bool:
     """Check if git is installed and available in PATH."""
     return which_tool("git") is not None
 
+def detect_uv() -> Optional[str]:
+    """Detect if uv (Astral fast Python manager) is installed and available in PATH."""
+    return which_tool("uv")
+
 def detect_python() -> str:
     """Return the currently executing python interpreter path."""
     return sys.executable

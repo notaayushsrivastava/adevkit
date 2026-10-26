@@ -9,6 +9,7 @@ from InquirerPy import inquirer
 from InquirerPy.prompts.list import ListPrompt
 from InquirerPy.base.control import Choice
 from InquirerPy.separator import Separator
+from .utils.system import detect_uv
 
 def prompt_project_name(default_name: str = "my-agentic-project") -> str:
     """Prompt the user for the project name."""
@@ -207,16 +208,22 @@ def prompt_prd_mode() -> Dict[str, Any]:
     else:
         return {"mode": "skip"}
 
-def prompt_env_options(has_python: bool, has_node: bool) -> Dict[str, bool]:
-    """Prompt for automated environment setup toggles."""
+def prompt_env_options(
+    has_python: bool,
+    has_node: bool,
+    default_use_uv: Optional[bool] = None,
+) -> Dict[str, Any]:
+    """Prompt for automated environment setup toggles, with uv preference support."""
     choices = [
         Choice(value="git", name="Initialize Git repository & smart .gitignore", enabled=True),
         Choice(value="dotenv", name="Create .env from .env.example (if available)", enabled=True),
         Choice(value="vscode", name="Configure .vscode settings and recommended extensions", enabled=True),
     ]
 
+    has_uv = detect_uv() is not None
     if has_python:
-        choices.append(Choice(value="venv", name="Create Python .venv & install requirements.txt", enabled=True))
+        venv_name = "Create Python .venv & install requirements.txt (uv detected)" if has_uv else "Create Python .venv & install requirements.txt"
+        choices.append(Choice(value="venv", name=venv_name, enabled=True))
 
     if has_node:
         choices.append(Choice(value="node", name="Auto-detect package manager and install node_modules", enabled=True))
@@ -226,10 +233,21 @@ def prompt_env_options(has_python: bool, has_node: bool) -> Dict[str, bool]:
         choices=choices,
     ).execute()
 
+    use_uv = False
+    if "venv" in selected and has_python:
+        if default_use_uv is not None:
+            use_uv = default_use_uv
+        elif has_uv:
+            use_uv = inquirer.confirm(
+                message="Use uv (Astral) for ultra-fast virtual environment setup & installation?",
+                default=True,
+            ).execute()
+
     return {
         "git": "git" in selected,
         "dotenv": "dotenv" in selected,
         "vscode": "vscode" in selected,
         "venv": "venv" in selected,
         "node": "node" in selected,
+        "uv": use_uv,
     }

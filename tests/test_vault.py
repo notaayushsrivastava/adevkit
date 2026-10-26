@@ -6,6 +6,8 @@ from devkit.vault import (
     list_configs,
     get_default_agents,
     set_default_agents,
+    get_preferred_python_pm,
+    set_preferred_python_pm,
 )
 
 
@@ -45,3 +47,14 @@ def test_vault_default_agents(tmp_path, monkeypatch):
     # Custom configuration
     set_default_agents(["cursor", "windsurf"])
     assert get_default_agents() == ["cursor", "windsurf"]
+
+
+def test_vault_python_pm_preference(tmp_path, monkeypatch):
+    test_vault = tmp_path / "test_vault.json"
+    monkeypatch.setattr("devkit.vault.VAULT_FILE", test_vault)
+
+    assert get_preferred_python_pm() is None
+    set_preferred_python_pm("uv")
+    assert get_preferred_python_pm() == "uv"
+    set_preferred_python_pm("pip")
+    assert get_preferred_python_pm() == "pip"

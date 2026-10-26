@@ -16,12 +16,12 @@ if (-not $Version -or $Version.Trim() -eq "") {
     }
 }
 if (-not $Version) {
-    $Version = "0.1.1"
+    $Version = "0.1.2"
 }
 $Version = $Version.Trim().TrimStart('v')
 # WiX requires x.x.x or x.x.x.x
 if ($Version -notmatch '^\d+(\.\d+){1,3}$') {
-    $Version = "0.1.1"
+    $Version = "0.1.2"
 }
 
 Write-Host "========================================" -ForegroundColor Cyan

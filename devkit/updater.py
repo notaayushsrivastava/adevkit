@@ -18,7 +18,7 @@ GITHUB_RELEASES_URL = "https://api.github.com/repos/notaayushsrivastava/adevkit/
 
 def detect_installation_type() -> str:
     """
-    Detect whether DevKit is running as an MSI/frozen executable or as a Python package.
+    Detect whether DevKit is running as an MSI/binary executable or as a Python package.
     Can be overridden via DEVKIT_INSTALL_TYPE environment variable ('msi' or 'python').
     """
     env_override = os.environ.get("DEVKIT_INSTALL_TYPE", "").strip().lower()
@@ -28,7 +28,13 @@ def detect_installation_type() -> str:
         return "python"
 
     if getattr(sys, "frozen", False):
-        return "msi"
+        if sys.platform == "win32":
+            return "msi"
+        elif sys.platform.startswith("linux"):
+            return "linux_binary"
+        elif sys.platform == "darwin":
+            return "macos_binary"
+        return "binary"
     return "python"
 
 
@@ -82,10 +88,16 @@ def check_pypi_update(current_version: str = __version__, timeout: float = 2.0) 
     return None
 
 
-def check_msi_update(current_version: str = __version__, timeout: float = 2.0) -> Optional[Dict[str, Any]]:
+def check_binary_update(
+    current_version: str = __version__,
+    timeout: float = 2.0,
+    target_platform: Optional[str] = None,
+) -> Optional[Dict[str, Any]]:
     """
-    Check GitHub Releases for the latest Windows MSI / executable release.
+    Check GitHub Releases for the latest platform binary / installer release.
+    Supports Windows (MSI / zip), Linux (deb / tar.gz), and macOS (pkg / tar.gz).
     """
+    plat = target_platform or sys.platform
     try:
         req = urllib.request.Request(
             GITHUB_RELEASES_URL,
@@ -100,30 +112,74 @@ def check_msi_update(current_version: str = __version__, timeout: float = 2.0) -
                 tag_name = data.get("tag_name", "").strip().lstrip("v")
                 if tag_name:
                     has_update = is_newer_version(tag_name, current_version)
-                    
-                    # Search for MSI asset
-                    msi_download_url = None
-                    for asset in data.get("assets", []):
-                        name = asset.get("name", "")
-                        if name.endswith(".msi"):
-                            msi_download_url = asset.get("browser_download_url")
-                            break
-
                     release_url = data.get("html_url") or "https://github.com/notaayushsrivastava/adevkit/releases/latest"
-                    download_url = msi_download_url or release_url
                     
+                    matched_asset_url = None
+                    update_instruction = ""
+                    assets = data.get("assets", [])
+
+                    # Platform asset matching
+                    if plat in ("win32", "windows") or plat.startswith("win"):
+                        for asset in assets:
+                            name = asset.get("name", "").lower()
+                            if name.endswith(".msi"):
+                                matched_asset_url = asset.get("browser_download_url")
+                                update_instruction = f"Download MSI installer: {matched_asset_url}"
+                                break
+                    elif plat.startswith("linux"):
+                        for asset in assets:
+                            name = asset.get("name", "").lower()
+                            if name.endswith(".deb"):
+                                matched_asset_url = asset.get("browser_download_url")
+                                update_instruction = f"Download & install .deb: sudo dpkg -i {name}"
+                                break
+                            elif "linux" in name and name.endswith(".tar.gz"):
+                                matched_asset_url = asset.get("browser_download_url")
+                                update_instruction = f"Download & extract: {matched_asset_url}"
+                    elif plat in ("darwin", "macos") or plat.startswith("mac"):
+                        for asset in assets:
+                            name = asset.get("name", "").lower()
+                            if name.endswith(".pkg"):
+                                matched_asset_url = asset.get("browser_download_url")
+                                update_instruction = f"Download Apple PKG installer: {matched_asset_url}"
+                                break
+                            elif "macos" in name and name.endswith(".tar.gz"):
+                                matched_asset_url = asset.get("browser_download_url")
+                                update_instruction = f"Download & extract: {matched_asset_url}"
+                    
+                    # Fallback to any MSI or first asset
+                    if not matched_asset_url:
+                        for asset in assets:
+                            name = asset.get("name", "")
+                            if name.endswith(".msi") or name.endswith(".zip") or name.endswith(".tar.gz") or name.endswith(".deb") or name.endswith(".pkg"):
+                                matched_asset_url = asset.get("browser_download_url")
+                                update_instruction = f"Download installer: {matched_asset_url}"
+                                break
+
+                    download_url = matched_asset_url or release_url
+                    if not update_instruction:
+                        update_instruction = f"Download from GitHub Release: {download_url}"
+
+                    is_windows = plat in ("win32", "windows") or plat.startswith("win")
                     return {
-                        "install_type": "msi",
+                        "install_type": "msi" if is_windows else "binary",
                         "current_version": current_version,
                         "latest_version": tag_name,
                         "update_available": has_update,
-                        "update_command": f"Download MSI installer: {download_url}",
+                        "update_command": update_instruction,
                         "url": download_url,
                         "release_page": release_url,
                     }
     except Exception:
         pass
     return None
+
+
+def check_msi_update(current_version: str = __version__, timeout: float = 2.0) -> Optional[Dict[str, Any]]:
+    """
+    Check GitHub Releases for the latest Windows MSI / executable release (calls check_binary_update).
+    """
+    return check_binary_update(current_version=current_version, timeout=timeout, target_platform="win32")
 
 
 def load_cached_update(max_age_seconds: int = CACHE_TTL_SECONDS) -> Optional[Dict[str, Any]]:
@@ -173,8 +229,8 @@ def check_for_updates(
             cached["update_available"] = is_newer_version(cached_latest, current_version)
             return cached
 
-    if target_mode == "msi":
-        res = check_msi_update(current_version=current_version, timeout=timeout)
+    if target_mode in ("msi", "binary", "linux_binary", "macos_binary", "linux", "macos", "pkg", "deb"):
+        res = check_binary_update(current_version=current_version, timeout=timeout)
     else:
         res = check_pypi_update(current_version=current_version, timeout=timeout)
 

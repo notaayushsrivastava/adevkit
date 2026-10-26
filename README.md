@@ -1,6 +1,18 @@
+```text
+ █████╗  █████╗ ██╗   ██╗██╗   ██╗███████╗██╗  ██╗███████╗    ██████╗ ███████╗██╗   ██╗██╗  ██╗██╗████████╗
+██╔══██╗██╔══██╗╚██╗ ██╔╝██║   ██║██╔════╝██║  ██║██╔════╝    ██╔══██╗██╔════╝██║   ██║██║ ██╔╝██║╚══██╔══╝
+███████║███████║ ╚████╔╝ ██║   ██║███████╗███████║███████╗    ██║  ██║█████╗  ██║   ██║█████╔╝ ██║   ██║   
+██╔══██║██╔══██║  ╚██╔╝  ██║   ██║╚════██║██╔══██║╚════██║    ██║  ██║██╔══╝  ╚██╗ ██╔╝██╔═██╗ ██║   ██║   
+██║  ██║██║  ██║   ██║   ╚██████╔╝███████║██║  ██║███████║    ██████╔╝███████╗ ╚████╔╝ ██║  ██╗██║   ██║   
+╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝    ╚═════╝ ╚══════╝  ╚═══╝  ╚═╝  ╚═╝╚═╝   ╚═╝   
+```
+
 # adevkit (Aayush's DevKit)
 
 > **One-Command Project Scaffolding with Agentic Skills, AI Assistant Guidelines & Environment Setup**
+
+
+[![adevkit Builds](https://github.com/notaayushsrivastava/adevkit/actions/workflows/release.yml/badge.svg)](https://github.com/notaayushsrivastava/adevkit/actions/workflows/release.yml)
 
 **adevkit** (Aayush's DevKit) is a fast, interactive developer toolkit CLI designed to initialize production-ready projects in seconds. It handles everything: asking project names, generating tailored codebases, selecting target AI coding assistants (Antigravity, Cursor, Claude Code, GitHub Copilot, Windsurf, Aider), auto-installing curated and custom AI agent skills (like `skills.sh`), creating comprehensive specifications, securely storing API credentials (with Windows DPAPI encryption), and setting up isolated Python virtual environments, Git, Node packages, and VSCode settings.
 
@@ -34,7 +46,7 @@
     - **`nextlevelbuilder/ui-ux-pro-max-skill`**: `ui-ux-pro-max`, `design`, `design-system`, `ui-styling`, `brand`, `banner-design`, `slides`.
     - **`emilkowalski/skills`**: `emil-design-eng`, `animate`, `animate-expo`, `animation-performance`, `apple-design`, `break-ui`, `improve-animations`, `mobile-native`.
 - **Automated Environment Setup**:
-  - **Python**: Creates `.venv` using active Python interpreter, installs `requirements.txt`.
+  - **Python**: Automated `.venv` creation and dependency installation via **`uv`** (Astral's ultra-fast Python manager) or standard `venv`/`pip`. Configurable per-project via `--uv`/`--no-uv` or globally via `adevkit config set-python-pm uv`.
   - **Node.js**: Automatically detects `bun`, `pnpm`, `yarn`, or `npm` and installs `node_modules`.
   - **Git**: Initializes repository and crafts stack-tailored `.gitignore`.
   - **Environment**: Copies `.env.example` to `.env` without overwriting.
@@ -52,17 +64,24 @@
 
 ## Quick Start
 
-### 1. Install via PyPI (Recommended)
+### 1. Install via PyPI (All Platforms)
 ```bash
-pip install adevkit
+pip install --upgrade adevkit
 ```
 Now run `devkit` or `adevkit` anywhere in your terminal:
 ```bash
 devkit init
 ```
 
-### 2. Windows Native MSI Installer
-Download and execute `AayushsDevKit-v0.1.1-x64.msi` from the [Releases](https://github.com/notaayushsrivastava/adevkit/releases) tab. It automatically adds `devkit` to your system `PATH`.
+### 2. Universal 1-Line Installer (Linux & macOS)
+```bash
+curl -fsSL https://raw.githubusercontent.com/notaayushsrivastava/adevkit/main/installer/install.sh | bash
+```
+
+### 3. Native Platform Installers
+- **Windows**: Download and run [`AayushsDevKit-v0.1.2-x64.msi`](https://github.com/notaayushsrivastava/adevkit/releases). It automatically configures `devkit` in your system `PATH`.
+- **macOS**: Download and run [`AayushsDevKit-v0.1.2-macos.pkg`](https://github.com/notaayushsrivastava/adevkit/releases) (or extract `devkit-v0.1.2-macos-arm64.tar.gz`).
+- **Linux (Debian/Ubuntu)**: Download [`adevkit_0.1.2_amd64.deb`](https://github.com/notaayushsrivastava/adevkit/releases) and run `sudo dpkg -i adevkit_0.1.2_amd64.deb` (or extract `devkit-v0.1.2-linux-x64.tar.gz`).
 
 ### 3. Run Directly from Source
 ```powershell
@@ -195,32 +214,8 @@ The test suite covers all 10 templates, custom template snapshots, skills instal
 
 ---
 
-## CI/CD & Automated MSI Release
-
-This repository includes a dedicated GitHub Actions workflow ([`.github/workflows/release.yml`](.github/workflows/release.yml)) that automates building and releasing the application.
-
-### Pipeline Workflow:
-1. **Quality Gate**: Runs the full `pytest` suite on `windows-latest`.
-2. **PyInstaller Compilation**: Builds a self-contained `devkit.exe` bundling all 42 agent skills and templates (target machines require zero Python setup).
-3. **WiX MSI Installer Packaging**: Uses WiX Toolset to produce `AayushsDevKit-v<version>-x64.msi`, which installs to `Program Files` and **configures the system `PATH` environment variable**.
-4. **PyPI Publishing (`adevkit`)**: Builds wheel & source tarball, and publishes automatically to PyPI via `pypa/gh-action-pypi-publish` using the GitHub secret `PYPI_API_TOKEN`.
-5. **Portable Zip & SHA256 Checksums**: Compresses `devkit.exe` into a portable `.zip` and generates `SHA256SUMS.txt`.
-6. **GitHub Release Publication**: Automatically publishes the release under the version tag specified in `pyproject.toml` (e.g., `v0.1.1`) with `.msi`, `.zip`, `.whl`, `.tar.gz`, and checksums.
-
-### Prerequisites for PyPI Publishing:
-Add your PyPI API token to your GitHub repository secrets:
-- Name: **`PYPI_API_TOKEN`**
-- Value: `pypi-AgEIcHlwaS5vcmc...` (Generated from [pypi.org/manage/account/token/](https://pypi.org/manage/account/token/))
-
-### Triggering a Release:
-- **Pushing a tag**:
-  ```powershell
-  git tag v0.1.1
-  git push origin v0.1.1
-  ```
-- **Manual Dispatch**: Go to the **Actions** tab on GitHub, select **Build & Release Aayush's DevKit**, and click **Run workflow**.
-
----
-
 ## License
-MIT © Aayush
+
+MIT License
+
+Copyright (c) 2026-Present Aayush Srivastava

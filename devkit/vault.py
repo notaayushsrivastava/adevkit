@@ -13,6 +13,17 @@ SENSITIVE_KEYWORDS = {
 }
 
 
+def _get_user_salt() -> bytes:
+    """Derive user/machine bound salt safely without throwing on POSIX headless/CI."""
+    user = os.environ.get("USER") or os.environ.get("USERNAME") or os.environ.get("LOGNAME")
+    if not user:
+        try:
+            user = os.getlogin()
+        except Exception:
+            user = "default_user"
+    return hashlib.sha256(f"{user}_{Path.home()}".encode("utf-8", errors="ignore")).digest()
+
+
 def _is_sensitive_key(key: str) -> bool:
     """Check if key name implies sensitive data that should be encrypted."""
     import re
@@ -61,7 +72,7 @@ def _encrypt_data(plaintext: str) -> Dict[str, Any]:
             pass
 
     # POSIX / Fallback encryption with machine/user salt
-    salt = hashlib.sha256(f"{os.getlogin()}_{Path.home()}".encode("utf-8", errors="ignore")).digest()
+    salt = _get_user_salt()
     data_bytes = plaintext.encode("utf-8")
     xor_bytes = bytes([b ^ salt[i % len(salt)] for i, b in enumerate(data_bytes)])
     return {"_enc": True, "_mech": "salted", "data": base64.b64encode(xor_bytes).decode("ascii")}
@@ -106,7 +117,7 @@ def _decrypt_data(payload: Dict[str, Any]) -> str:
             pass
 
     # Fallback decryption
-    salt = hashlib.sha256(f"{os.getlogin()}_{Path.home()}".encode("utf-8", errors="ignore")).digest()
+    salt = _get_user_salt()
     plain_bytes = bytes([b ^ salt[i % len(salt)] for i, b in enumerate(cipher_bytes)])
     return plain_bytes.decode("utf-8", errors="ignore")
 
@@ -210,3 +221,16 @@ def set_default_agents(agents: List[str]) -> None:
     """Persist the user's default preferred AI agents."""
     cleaned = [str(a).strip().lower() for a in agents if str(a).strip()]
     set_config("default_agents", cleaned, secret=False)
+
+
+def get_preferred_python_pm() -> Optional[str]:
+    """Get the user's preferred Python package/environment manager ('uv' or 'pip')."""
+    val = get_config("preferred_python_pm")
+    if val:
+        return str(val).strip().lower()
+    return None
+
+
+def set_preferred_python_pm(pm: str) -> None:
+    """Set the user's preferred Python package/environment manager ('uv' or 'pip')."""
+    set_config("preferred_python_pm", pm.strip().lower(), secret=False)

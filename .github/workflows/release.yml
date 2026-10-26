@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       release_version:
-        description: 'Version tag override (e.g. 0.1.1). Leave empty to read from pyproject.toml'
+        description: 'Version tag override (e.g. 0.1.2). Leave empty to read from pyproject.toml'
         required: false
         default: ''
 
@@ -22,8 +22,12 @@ permissions:
 
 jobs:
   test:
-    name: Run Automated Tests
-    runs-on: windows-latest
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
 
     steps:
       - name: Checkout Code
@@ -46,8 +50,8 @@ jobs:
         run: |
           pytest tests/ -v
 
-  build-and-release:
-    name: Build Standalone Executable, MSI & Publish GitHub Release
+  build-windows:
+    name: Build Windows Executable & MSI Installer
     needs: test
     if: github.event_name != 'pull_request'
     runs-on: windows-latest
@@ -74,12 +78,11 @@ jobs:
           } elseif ($env:GITHUB_REF_TYPE -eq 'tag') {
             $version = $env:GITHUB_REF_NAME.TrimStart('v')
           } else {
-            # Extract from pyproject.toml
             $content = Get-Content "pyproject.toml" -Raw
             if ($content -match 'version\s*=\s*["'']([^"'']+)["'']') {
               $version = $matches[1]
             } else {
-              $version = "0.1.1"
+              $version = "0.1.2"
             }
           }
           Write-Host "Determined Release Version: $version" -ForegroundColor Green
@@ -132,44 +135,224 @@ jobs:
           $env:PATH = "C:\Program Files (x86)\WiX Toolset v3.11\bin;$env:PATH"
           .\installer\build_msi.ps1 -Version $env:VERSION -DistDir "dist" -OutputDir "output"
 
-      - name: Generate Checksums
-        shell: pwsh
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-artifacts
+          path: output/*
+
+  build-linux:
+    name: Build Linux Binary & Debian Package
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code with Tags
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Determine Release Version
+        id: get_version
         run: |
-          $artifacts = Get-ChildItem -Path "output\*" -Include "*.msi", "*.zip", "*.whl", "*.tar.gz"
-          $checksumLines = @()
-          foreach ($file in $artifacts) {
-            $hash = (Get-FileHash -Path $file.FullName -Algorithm SHA256).Hash.ToLower()
-            $name = $file.Name
-            $checksumLines += "$hash  $name"
-          }
-          $checksumLines | Out-File -FilePath "output\SHA256SUMS.txt" -Encoding ascii
-          Write-Host "Generated SHA256SUMS.txt:" -ForegroundColor Yellow
-          Get-Content "output\SHA256SUMS.txt"
+          VER_INPUT="${{ github.event.inputs.release_version }}"
+          if [ -n "$VER_INPUT" ]; then
+            VERSION="${VER_INPUT#v}"
+          elif [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION=$(grep -m 1 '^version =' pyproject.toml | sed -E 's/.*"([^"]+)".*/\1/')
+            [ -z "$VERSION" ] && VERSION="0.1.2"
+          fi
+          echo "Determined Release Version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
+
+      - name: Install Packaging Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Compile Standalone Executable (PyInstaller)
+        run: |
+          pyinstaller --clean --noconfirm devkit.spec
+          if [ ! -f "dist/devkit" ]; then
+            echo "Error: dist/devkit was not created." >&2
+            exit 1
+          fi
+          chmod +x dist/devkit
+          echo "Verifying compiled executable:"
+          ./dist/devkit info
+
+      - name: Build Linux Tarball & Debian Package (.deb)
+        run: |
+          chmod +x ./installer/build_linux.sh
+          ./installer/build_linux.sh "$VERSION" "dist" "output"
+
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifacts
+          path: output/*
+
+  build-macos:
+    name: Build macOS Binary & PKG Installer
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Code with Tags
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Determine Release Version
+        id: get_version
+        run: |
+          VER_INPUT="${{ github.event.inputs.release_version }}"
+          if [ -n "$VER_INPUT" ]; then
+            VERSION="${VER_INPUT#v}"
+          elif [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION=$(grep -m 1 '^version =' pyproject.toml | sed -E 's/.*"([^"]+)".*/\1/')
+            [ -z "$VERSION" ] && VERSION="0.1.2"
+          fi
+          echo "Determined Release Version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
+
+      - name: Install Packaging Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Compile Standalone Executable (PyInstaller)
+        run: |
+          pyinstaller --clean --noconfirm devkit.spec
+          if [ ! -f "dist/devkit" ]; then
+            echo "Error: dist/devkit was not created." >&2
+            exit 1
+          fi
+          chmod +x dist/devkit
+          echo "Verifying compiled executable:"
+          ./dist/devkit info
+
+      - name: Build macOS Tarball & Apple PKG Installer (.pkg)
+        run: |
+          chmod +x ./installer/build_macos.sh
+          ./installer/build_macos.sh "$VERSION" "dist" "output"
+
+      - name: Upload macOS Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-artifacts
+          path: output/*
+
+  publish-github-release:
+    name: Publish Multi-Platform Release to GitHub
+    needs: [build-windows, build-linux, build-macos]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Determine Release Version
+        id: get_version
+        run: |
+          VER_INPUT="${{ github.event.inputs.release_version }}"
+          if [ -n "$VER_INPUT" ]; then
+            VERSION="${VER_INPUT#v}"
+          elif [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION=$(grep -m 1 '^version =' pyproject.toml | sed -E 's/.*"([^"]+)".*/\1/')
+            [ -z "$VERSION" ] && VERSION="0.1.2"
+          fi
+          echo "Determined Release Version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
+
+      - name: Download All Platform Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded_artifacts
+
+      - name: Consolidate Output & Copy Installer Scripts
+        run: |
+          mkdir -p output
+          find downloaded_artifacts -type f -exec cp {} output/ \;
+          cp installer/install.sh output/install.sh
+          echo "Collected release artifacts in output/:"
+          ls -la output/
+
+      - name: Generate Checksums
+        run: |
+          python -c '
+          import os, glob, hashlib
+          files = sorted(glob.glob("output/*"))
+          lines = []
+          for f in files:
+              if os.path.isfile(f) and not f.endswith("SHA256SUMS.txt"):
+                  with open(f, "rb") as fp:
+                      h = hashlib.sha256(fp.read()).hexdigest()
+                  lines.append(f"{h}  {os.path.basename(f)}")
+          with open("output/SHA256SUMS.txt", "w") as fp:
+              fp.write("\n".join(lines) + "\n")
+          '
+          echo "Generated SHA256SUMS.txt:"
+          cat output/SHA256SUMS.txt
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG_NAME }}
-          name: Aayush's DevKit (${{ env.TAG_NAME }})
+          name: adevkit (${{ env.TAG_NAME }})
           draft: false
           prerelease: false
           generate_release_notes: true
           files: |
             output/*.msi
+            output/*.pkg
+            output/*.deb
             output/*.zip
             output/*.whl
             output/*.tar.gz
+            output/install.sh
             output/SHA256SUMS.txt
           body: |
-            ## Aayush's DevKit (${{ env.TAG_NAME }})
+            ## adevkit (${{ env.TAG_NAME }}) - Aayush's DevKit
             
-            Single-command project scaffolding with Agentic skills (`.agents/skills/`), custom templates, and automated environment configuration.
+            Single-command project scaffolding with Agentic skills (`.agents/skills/`), custom templates, multi-assistant AI guidelines, secure credential vault, and automated environment configuration.
             
             ---
             
-            ### Installation Options
+            ### Quick Installation Options
             
-            #### 1. Via PyPI (`pip install`)
+            #### 1. Universal One-Line Installer (Linux & macOS)
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/notaayushsrivastava/adevkit/main/installer/install.sh | bash
+            ```
+            
+            #### 2. Via PyPI (`pip install`) - All Platforms
             ```bash
             pip install --upgrade adevkit
             ```
@@ -178,24 +361,31 @@ jobs:
             devkit init
             ```
             
-            #### 2. Native Windows MSI Installer (Recommended for Windows)
-            Download and run **`AayushsDevKit-v${{ env.VERSION }}-x64.msi`**.
-            - Installs to `C:\Program Files\Aayush's DevKit\`
-            - **Automatically configures your system `PATH`** so `devkit` is globally available anywhere in PowerShell or CMD.
+            #### 3. Native Platform Installers
             
-            #### 3. Portable Standalone Binary
-            Download **`devkit-v${{ env.VERSION }}-windows-x64.zip`**, extract `devkit.exe`, and place it in any folder in your `PATH`.
+            - **Windows**: Download and run **`AayushsDevKit-v${{ env.VERSION }}-x64.msi`**.
+              - Installs to `C:\Program Files\adevkit\`
+              - **Configures system PATH automatically** so `devkit` is globally available.
+              - Portable standalone zip: **`devkit-v${{ env.VERSION }}-windows-x64.zip`**
+            
+            - **macOS (Apple Silicon & Intel)**:
+              - Double-click installer: **`AayushsDevKit-v${{ env.VERSION }}-macos.pkg`** (installs `devkit` directly to `/usr/local/bin`).
+              - Or extract archive: **`devkit-v${{ env.VERSION }}-macos-arm64.tar.gz`**
+            
+            - **Linux (Ubuntu / Debian / Mint)**:
+              - Debian package: `sudo dpkg -i adevkit_${{ env.VERSION }}_amd64.deb`
+              - Or extract archive: **`devkit-v${{ env.VERSION }}-linux-x64.tar.gz`**
             
             ---
             
             ### Verification & Quick Start
-            Open a new terminal and verify installation:
-            ```powershell
+            Open a terminal and verify installation:
+            ```bash
             devkit info
             ```
             
             Initialize a new project:
-            ```powershell
+            ```bash
             devkit init
             ```
             
@@ -203,8 +393,8 @@ jobs:
             
             ### Integrity Verification
             Verify downloads against **`SHA256SUMS.txt`**:
-            ```powershell
-            Get-FileHash -Algorithm SHA256 .\AayushsDevKit-v${{ env.VERSION }}-x64.msi
+            ```bash
+            sha256sum -c SHA256SUMS.txt
             ```
 
   publish-pypi:

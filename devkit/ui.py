@@ -1,4 +1,6 @@
 import sys
+import random
+import shutil
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
@@ -6,7 +8,48 @@ from rich.table import Table
 
 console = Console()
 
-BANNER_ART = r"""
+BANNER_1 = r"""
+ █████╗  █████╗ ██╗   ██╗██╗   ██╗███████╗██╗  ██╗███████╗    ██████╗ ███████╗██╗   ██╗██╗  ██╗██╗████████╗
+██╔══██╗██╔══██╗╚██╗ ██╔╝██║   ██║██╔════╝██║  ██║██╔════╝    ██╔══██╗██╔════╝██║   ██║██║ ██╔╝██║╚══██╔══╝
+███████║███████║ ╚████╔╝ ██║   ██║███████╗███████║███████╗    ██║  ██║█████╗  ██║   ██║█████╔╝ ██║   ██║   
+██╔══██║██╔══██║  ╚██╔╝  ██║   ██║╚════██║██╔══██║╚════██║    ██║  ██║██╔══╝  ╚██╗ ██╔╝██╔═██╗ ██║   ██║   
+██║  ██║██║  ██║   ██║   ╚██████╔╝███████║██║  ██║███████║    ██████╔╝███████╗ ╚████╔╝ ██║  ██╗██║   ██║   
+╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝    ╚═════╝ ╚══════╝  ╚═══╝  ╚═╝  ╚═╝╚═╝   ╚═╝   
+"""
+
+BANNER_2 = r"""
+ █████   █████  ██    ██ ██    ██ ███████ ██   ██ ███████     ██████  ███████ ██    ██ ██   ██ ██ ████████ 
+██   ██ ██   ██  ██  ██  ██    ██ ██      ██   ██ ██          ██   ██ ██      ██    ██ ██  ██  ██    ██    
+███████ ███████   ████   ██    ██ ███████ ███████ ███████     ██   ██ █████   ██    ██ █████   ██    ██    
+██   ██ ██   ██    ██    ██    ██      ██ ██   ██      ██     ██   ██ ██       ██  ██  ██  ██  ██    ██    
+██   ██ ██   ██    ██     ██████  ███████ ██   ██ ███████     ██████  ███████   ████   ██   ██ ██    ██    
+"""
+
+BANNER_3 = r"""
+ ▄▄▄      ▄▄▄     ▓██   ██▓ █    ██   ██████  ██░ ██   ██████    ▓█████▄ ▓█████ ██▒   █▓ ██ ▄█▀ ██▓▄▄▄█████▓
+▒████▄   ▒████▄    ▒██  ██▒ ██  ▓██▒▒██    ▒ ▓██░ ██▒▒██    ▒    ▒██▀ ██▌▓█   ▀▓██░   █▒ ██▄█▒ ▓██▒▓  ██▒ ▓▒
+▒██  ▀█▄ ▒██  ▀█▄   ▒██ ██░▓██  ▒██░░ ▓██▄   ▒██▀▀██░░ ▓██▄      ░██   █▌▒███   ▓██  █▒░▓███▄░ ▒██▒▒ ▓██░ ▒░
+░██▄▄▄▄██░██▄▄▄▄██  ░ ▐██▓░▓▓█  ░██░  ▒   ██▒░▓█ ░██   ▒   ██▒   ░▓█▄   ▌▒▓█  ▄  ▒██ █░░▓██ █▄ ░██░░ ▓██▓ ░ 
+ ▓█   ▓██▒▓█   ▓██▒ ░ ██▒▓░▒▒█████▓ ▒██████▒▒░▓█▒░██▓▒██████▒▒   ░▒████▓ ░▒████▒  ▒▀█░  ▒██▒ █▄░██░  ▒██▒ ░ 
+ ▒▒   ▓▒█░▒▒   ▓▒█░  ██▒▒▒ ░▒▓▒ ▒ ▒ ▒ ▒▓▒ ▒ ░ ▒ ░░▒░▒▒ ▒▓▒ ▒ ░    ▒▒▓  ▒ ░░ ▒░ ░  ░ ▐░  ▒ ▒▒ ▓▒░▓    ▒ ░░   
+  ▒   ▒▒ ░ ▒   ▒▒ ░▓██ ░▒░ ░░▒░ ░ ░ ░ ░▒  ░ ░ ▒ ░▒░ ░░ ░▒  ░ ░    ░ ▒  ▒  ░ ░  ░  ░ ░░  ░ ░▒ ▒░ ▒ ░    ░    
+  ░   ▒    ░   ▒   ▒ ▒ ░░   ░░░ ░ ░ ░  ░  ░   ░  ░░ ░░  ░  ░      ░ ░  ░    ░       ░░  ░ ░░ ░  ▒ ░  ░      
+      ░  ░     ░  ░░ ░        ░           ░   ░  ░  ░      ░        ░       ░  ░     ░  ░  ░    ░           
+                   ░ ░                                            ░                 ░                       
+"""
+
+BANNER_4 = r"""
+   ▄████████    ▄████████ ▄██   ▄   ███    █▄     ▄████████    ▄█    █▄       ▄████████      ████████▄     ▄████████  ▄█    █▄     ▄█   ▄█▄  ▄█      ███     
+  ███    ███   ███    ███ ███   ██▄ ███    ███   ███    ███   ███    ███     ███    ███      ███   ▀███   ███    ███ ███    ███   ███ ▄███▀ ███  ▀█████████▄ 
+  ███    ███   ███    ███ ███▄▄▄███ ███    ███   ███    █▀    ███    ███     ███    █▀       ███    ███   ███    █▀  ███    ███   ███▐██▀   ███▌    ▀███▀▀██ 
+  ███    ███   ███    ███ ▀▀▀▀▀▀███ ███    ███   ███         ▄███▄▄▄▄███▄▄   ███             ███    ███  ▄███▄▄▄     ███    ███  ▄█████▀    ███▌     ███   ▀ 
+▀███████████ ▀███████████ ▄██   ███ ███    ███ ▀███████████ ▀▀███▀▀▀▀███▀  ▀███████████      ███    ███ ▀▀███▀▀▀     ███    ███ ▀▀█████▄    ███▌     ███     
+  ███    ███   ███    ███ ███   ███ ███    ███          ███   ███    ███            ███      ███    ███   ███    █▄  ███    ███   ███▐██▄   ███      ███     
+  ███    ███   ███    ███ ███   ███ ███    ███    ▄█    ███   ███    ███      ▄█    ███      ███   ▄███   ███    ███ ███    ███   ███ ▀███▄ ███      ███     
+  ███    █▀    ███    █▀   ▀█████▀  ████████▀   ▄████████▀    ███    █▀     ▄████████▀       ████████▀    ██████████  ▀██████▀    ███   ▀█▀ █▀      ▄████▀   
+"""
+
+BANNER_5 = r"""
    ___                 _        _         ___          _  ___ _   
   / _ \               | |      ( )       |   \        | |/ (_) |  
  / /_\ \__ _ _   _ _   _| |__    |/ ___    | |) |_____ _| ' / _| |_ 
@@ -17,15 +60,45 @@ BANNER_ART = r"""
               |___/                                                     
 """
 
-def print_banner():
-    """Display the Aayush's DevKit branding banner."""
-    text = Text(BANNER_ART, style="bold cyan")
+BANNER_VARIATIONS = [
+    BANNER_1,
+    BANNER_2,
+    BANNER_3,
+    BANNER_4,
+    BANNER_5,
+]
+
+# Alias for backwards compatibility
+BANNER_ART = BANNER_1
+
+
+def get_random_banner(variation: int | None = None) -> str:
+    """Return a banner variation, randomly selected or by index, respecting terminal width."""
+    if variation is not None and 0 <= variation < len(BANNER_VARIATIONS):
+        return BANNER_VARIATIONS[variation]
+
+    term_cols = shutil.get_terminal_size((80, 24)).columns
+    # Check which banners fit inside terminal without line wrapping
+    fitting = [
+        b for b in BANNER_VARIATIONS
+        if max(len(line) for line in b.strip("\n").splitlines()) <= (term_cols - 4)
+    ]
+    if fitting:
+        return random.choice(fitting)
+    return random.choice(BANNER_VARIATIONS)
+
+
+def print_banner(variation: int | None = None):
+    """Display the Aayush's DevKit branding banner with random variation."""
+    art = get_random_banner(variation)
+    text = Text(art.strip("\n"), style="bold cyan")
     panel = Panel(
         text,
-        title="[bold yellow]Aayush's DevKit[/bold yellow]",
+        title="[bold yellow]adevkit (Aayush's DevKit)[/bold yellow]",
         subtitle="[bold white]Single-Command Project Scaffolding & Agentic Environment Setup[/bold white]",
         border_style="bright_blue",
         padding=(0, 2),
+        expand=False,
     )
     console.print(panel)
     console.print()

@@ -31,6 +31,7 @@ from .ui import (
 from .utils.system import (
     detect_node_package_manager,
     detect_git,
+    detect_uv,
     detect_python,
     which_tool,
 )
@@ -67,6 +68,8 @@ from .vault import (
     list_configs,
     get_default_agents,
     set_default_agents,
+    get_preferred_python_pm,
+    set_preferred_python_pm,
     _is_sensitive_key,
 )
 from .skills.custom import (
@@ -152,6 +155,10 @@ def init(
     readme: Annotated[
         Optional[str],
         typer.Option("--readme", "-r", help="README template style (modern, minimal, enterprise, agentic, custom:<NAME>, or skip)"),
+    ] = None,
+    uv: Annotated[
+        Optional[bool],
+        typer.Option("--uv/--no-uv", help="Use uv for ultra-fast Python environment setup & package installation"),
     ] = None,
     yes: Annotated[
         bool,
@@ -254,16 +261,21 @@ def init(
         prd_config = prompt_prd_mode()
 
     # 5. Environment Options
+    pref_pm = get_preferred_python_pm()
+    default_uv = uv if uv is not None else (True if pref_pm == "uv" else (False if pref_pm in ("pip", "venv") else None))
+
     if yes:
+        use_uv_final = default_uv if default_uv is not None else (detect_uv() is not None)
         env_config = {
             "git": True,
             "dotenv": True,
             "vscode": True,
             "venv": has_python,
             "node": has_node,
+            "uv": use_uv_final,
         }
     else:
-        env_config = prompt_env_options(has_python, has_node)
+        env_config = prompt_env_options(has_python, has_node, default_use_uv=default_uv)
 
     # Summary
     print_summary_table(
@@ -371,10 +383,12 @@ def init(
         setup_vscode_config(dest_path, has_python=has_python, has_node=has_node)
         success("Configured .vscode/ settings and recommended extensions.")
 
-    # H. Python venv & pip
+    # H. Python venv & pip / uv
     if env_config.get("venv"):
-        with console.status("[cyan]Setting up Python virtual environment and dependencies...[/cyan]", spinner="dots"):
-            v_ok, v_msg = setup_python_environment(dest_path)
+        use_uv = bool(env_config.get("uv", False))
+        pm_label = "uv" if (use_uv and detect_uv()) else "venv & pip"
+        with console.status(f"[cyan]Setting up Python virtual environment and dependencies ({pm_label})...[/cyan]", spinner="dots"):
+            v_ok, v_msg = setup_python_environment(dest_path, use_uv=use_uv)
             if v_ok:
                 success(v_msg)
             else:
@@ -722,6 +736,20 @@ def config_set_agents_cmd(
     success(f"Updated default AI agents to: {', '.join(agents)}")
 
 
+@config_app.command(name="set-python-pm")
+def config_set_python_pm_cmd(
+    pm: Annotated[str, typer.Argument(help="Preferred Python package/environment manager: 'uv' or 'pip'")],
+):
+    """Set default preferred Python environment and package manager ('uv' or 'pip')."""
+    norm = pm.strip().lower()
+    if norm not in ("uv", "pip", "venv"):
+        error("Please specify 'uv' or 'pip'.")
+        raise typer.Exit(1)
+    chosen = "uv" if norm == "uv" else "pip"
+    set_preferred_python_pm(chosen)
+    success(f"Updated default Python tool preference to: {chosen}")
+
+
 # --- Update & Info Commands ---
 
 @app.command(name="check-update")
@@ -760,8 +788,18 @@ def check_update_command(
         console.print(table)
         return
 
-    active_type = target_mode if target_mode in ("msi", "python") else detect_installation_type()
-    channel_name = "Windows Native MSI (GitHub Releases)" if active_type == "msi" else "Python Package (PyPI adevkit)"
+    active_type = target_mode if target_mode in ("msi", "python", "binary", "linux", "macos") else detect_installation_type()
+    if active_type in ("msi", "binary", "linux_binary", "macos_binary"):
+        if sys.platform == "win32":
+            channel_name = "Windows Native MSI (GitHub Releases)"
+        elif sys.platform.startswith("linux"):
+            channel_name = "Linux Package / Binary (GitHub Releases)"
+        elif sys.platform == "darwin":
+            channel_name = "macOS Package / Binary (GitHub Releases)"
+        else:
+            channel_name = "Standalone Binary (GitHub Releases)"
+    else:
+        channel_name = "Python Package (PyPI adevkit)"
 
     with console.status(f"[cyan]Checking {channel_name} for updates...[/cyan]", spinner="dots"):
         res = check_for_updates(force=True, mode=active_type, timeout=4.0)
@@ -779,7 +817,9 @@ def check_update_command(
         if active_type == "python":
             console.print(f"  Run: [bold cyan]{res['update_command']}[/bold cyan]")
         else:
-            console.print(f"  Download MSI installer: [bold cyan]{res['url']}[/bold cyan]")
+            download_url = res.get("url", "")
+            cmd_str = res.get("update_command") or f"Download from: {download_url}"
+            console.print(f"  {cmd_str}")
     else:
         success(f"Aayush's DevKit is up to date (v{curr} via {channel_name}).")
 
@@ -795,10 +835,15 @@ def system_info():
     table.add_row("DevKit Version", __version__)
 
     install_type = detect_installation_type()
-    table.add_row(
-        "Installation Type",
-        "Windows Native MSI / Executable" if install_type == "msi" else "Python Package (pip / adevkit)",
-    )
+    if install_type == "msi":
+        display_type = "Windows Native MSI / Executable"
+    elif install_type in ("linux_binary", "linux"):
+        display_type = "Linux Standalone Binary / Package"
+    elif install_type in ("macos_binary", "macos"):
+        display_type = "macOS Standalone Binary / PKG"
+    else:
+        display_type = "Python Package (pip / adevkit)"
+    table.add_row("Installation Type", display_type)
 
     cached = load_cached_update()
     if cached and cached.get("install_type") == install_type:
@@ -811,6 +856,12 @@ def system_info():
         table.add_row("Update Status", "Run `devkit check-update` to verify")
 
     table.add_row("Python Executable", detect_python())
+    
+    uv_loc = detect_uv()
+    table.add_row("uv Available", f"Yes ({uv_loc})" if uv_loc else "No (astral.sh/uv)")
+    pref_pm = get_preferred_python_pm()
+    table.add_row("Preferred Python PM", pref_pm or ("uv (auto)" if uv_loc else "pip / venv"))
+
     table.add_row("Git Available", "Yes" if detect_git() else "No (Not in PATH)")
     
     node_pm = detect_node_package_manager()

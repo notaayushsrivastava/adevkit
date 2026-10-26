@@ -1,4 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
+import sys
 from pathlib import Path
 
 block_cipher = None
@@ -7,6 +8,8 @@ embedded_skills_path = Path('devkit/skills/embedded')
 datas = []
 if embedded_skills_path.exists():
     datas.append(('devkit/skills/embedded', 'devkit/skills/embedded'))
+
+upx_enabled = (sys.platform == 'win32')
 
 a = Analysis(
     ['app.py'],
@@ -52,7 +55,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=upx_enabled,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=True,

@@ -11,6 +11,7 @@ from devkit.updater import (
     parse_semver,
     check_pypi_update,
     check_msi_update,
+    check_binary_update,
     load_cached_update,
     save_cached_update,
     check_for_updates,
@@ -88,6 +89,56 @@ def test_check_msi_update_success():
         assert res["latest_version"] == "0.2.0"
         assert res["update_available"] is True
         assert res["url"].endswith(".msi")
+
+
+def test_check_linux_and_macos_update_success():
+    fake_response = {
+        "tag_name": "v0.2.0",
+        "html_url": "https://github.com/notaayushsrivastava/adevkit/releases/tag/v0.2.0",
+        "assets": [
+            {
+                "name": "adevkit_0.2.0_amd64.deb",
+                "browser_download_url": "https://github.com/notaayushsrivastava/adevkit/releases/download/v0.2.0/adevkit_0.2.0_amd64.deb",
+            },
+            {
+                "name": "AayushsDevKit-v0.2.0-macos.pkg",
+                "browser_download_url": "https://github.com/notaayushsrivastava/adevkit/releases/download/v0.2.0/AayushsDevKit-v0.2.0-macos.pkg",
+            },
+        ],
+    }
+    mock_resp = MagicMock()
+    mock_resp.status = 200
+    mock_resp.read.return_value = json.dumps(fake_response).encode("utf-8")
+    mock_resp.__enter__.return_value = mock_resp
+
+    with patch("urllib.request.urlopen", return_value=mock_resp):
+        # Linux test
+        res_linux = check_binary_update(current_version="0.1.1", target_platform="linux")
+        assert res_linux is not None
+        assert res_linux["install_type"] == "binary"
+        assert res_linux["latest_version"] == "0.2.0"
+        assert res_linux["url"].endswith(".deb")
+
+        # macOS test
+        res_mac = check_binary_update(current_version="0.1.1", target_platform="darwin")
+        assert res_mac is not None
+        assert res_mac["install_type"] == "binary"
+        assert res_mac["latest_version"] == "0.2.0"
+        assert res_mac["url"].endswith(".pkg")
+
+
+def test_frozen_installation_platforms(monkeypatch):
+    import sys
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+
+    monkeypatch.setattr(sys, "platform", "win32")
+    assert detect_installation_type() == "msi"
+
+    monkeypatch.setattr(sys, "platform", "linux")
+    assert detect_installation_type() == "linux_binary"
+
+    monkeypatch.setattr(sys, "platform", "darwin")
+    assert detect_installation_type() == "macos_binary"
 
 
 def test_check_update_network_error():

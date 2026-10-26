@@ -8,6 +8,7 @@ from devkit.scaffold import (
     setup_git_repository,
     setup_dotenv_file,
     setup_vscode_config,
+    setup_python_environment,
 )
 
 def test_generate_agents_md():
@@ -73,3 +74,52 @@ def test_setup_dotenv_file():
         assert setup_dotenv_file(target) is True
         assert (target / ".env").exists()
         assert (target / ".env").read_text(encoding="utf-8") == "PORT=3000\n"
+
+
+def test_setup_python_environment_standard(monkeypatch, tmp_path):
+    # Mock run_command to simulate successful execution
+    commands_run = []
+    def mock_run(cmd, cwd=None, timeout=300):
+        commands_run.append(cmd)
+        return 0, "Success", ""
+
+    monkeypatch.setattr("devkit.scaffold.env_setup.run_command", mock_run)
+
+    (tmp_path / "requirements.txt").write_text("fastapi\n", encoding="utf-8")
+    ok, msg = setup_python_environment(tmp_path, use_uv=False)
+    assert ok is True
+    assert "configured" in msg
+    assert any("-m" in c and "venv" in c for c in commands_run)
+
+
+def test_setup_python_environment_with_uv(monkeypatch, tmp_path):
+    commands_run = []
+    def mock_run(cmd, cwd=None, timeout=300):
+        commands_run.append(cmd)
+        return 0, "Success", ""
+
+    monkeypatch.setattr("devkit.scaffold.env_setup.run_command", mock_run)
+    monkeypatch.setattr("devkit.scaffold.env_setup.which_tool", lambda tool: "/usr/bin/uv" if tool == "uv" else None)
+
+    (tmp_path / "requirements.txt").write_text("fastapi\n", encoding="utf-8")
+    ok, msg = setup_python_environment(tmp_path, use_uv=True)
+    assert ok is True
+    assert "uv" in msg
+    assert any("uv" in c[0] and "venv" in c for c in commands_run)
+    assert any("uv" in c[0] and "pip" in c for c in commands_run)
+
+
+def test_setup_python_environment_uv_fallback(monkeypatch, tmp_path):
+    commands_run = []
+    def mock_run(cmd, cwd=None, timeout=300):
+        commands_run.append(cmd)
+        return 0, "Success", ""
+
+    monkeypatch.setattr("devkit.scaffold.env_setup.run_command", mock_run)
+    # uv is not installed
+    monkeypatch.setattr("devkit.scaffold.env_setup.which_tool", lambda tool: None)
+
+    ok, msg = setup_python_environment(tmp_path, use_uv=True)
+    assert ok is True
+    # Falls back to standard python -m venv
+    assert any("-m" in c and "venv" in c for c in commands_run)

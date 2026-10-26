@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <?ifndef Version?>
-    <?define Version = "0.1.1" ?>
+    <?define Version = "0.1.2" ?>
   <?endif?>
   <?define ProductVersion = "$(var.Version)" ?>
   <?define Manufacturer = "Aayush" ?>
