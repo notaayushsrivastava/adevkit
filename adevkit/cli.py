@@ -849,11 +849,11 @@ def system_info():
     if cached and cached.get("install_type") == install_type:
         latest = cached.get("latest_version")
         if cached.get("update_available"):
-            table.add_row("Update Status", f"[yellow]v{latest} available! (Run `devkit check-update`)[/yellow]")
+            table.add_row("Update Status", f"[yellow]v{latest} available! (Run `adevkit check-update`)[/yellow]")
         else:
             table.add_row("Update Status", f"[green]Up to date (v{__version__})[/green]")
     else:
-        table.add_row("Update Status", "Run `devkit check-update` to verify")
+        table.add_row("Update Status", "Run `adevkit check-update` to verify")
 
     table.add_row("Python Executable", detect_python())
     

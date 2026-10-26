@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       release_version:
-        description: 'Version tag override (e.g. 0.1.2). Leave empty to read from pyproject.toml'
+        description: 'Version tag override (e.g. 0.1.3). Leave empty to read from pyproject.toml'
         required: false
         default: ''
 
@@ -82,7 +82,7 @@ jobs:
             if ($content -match 'version\s*=\s*["'']([^"'']+)["'']') {
               $version = $matches[1]
             } else {
-              $version = "0.1.2"
+              $version = "0.1.3"
             }
           }
           Write-Host "Determined Release Version: $version" -ForegroundColor Green
@@ -98,20 +98,22 @@ jobs:
       - name: Compile Standalone Executable (PyInstaller)
         shell: pwsh
         run: |
-          pyinstaller --clean --noconfirm devkit.spec
-          if (!(Test-Path "dist\devkit.exe")) {
-            Write-Error "dist\devkit.exe was not created."
+          pyinstaller --clean --noconfirm adevkit.spec
+          if (!(Test-Path "dist\adevkit.exe")) {
+            Write-Error "dist\adevkit.exe was not created."
             exit 1
           }
+          # Create devkit.exe alias for backward-compatibility
+          Copy-Item "dist\adevkit.exe" "dist\devkit.exe" -Force
           Write-Host "Verifying compiled executable:" -ForegroundColor Cyan
-          & "dist\devkit.exe" info
+          & "dist\adevkit.exe" info
 
       - name: Prepare Output Directory & Portable Zip
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path "output" -Force | Out-Null
           $zipPath = "output\devkit-v$env:VERSION-windows-x64.zip"
-          Compress-Archive -Path "dist\devkit.exe" -DestinationPath $zipPath -Force
+          Compress-Archive -Path "dist\adevkit.exe", "dist\devkit.exe" -DestinationPath $zipPath -Force
           Write-Host "Created portable archive: $zipPath" -ForegroundColor Green
 
       - name: Build Python Distribution (Wheel & Source Archive)
@@ -169,7 +171,7 @@ jobs:
             VERSION="${GITHUB_REF_NAME#v}"
           else
             VERSION=$(grep -m 1 '^version =' pyproject.toml | sed -E 's/.*"([^"]+)".*/\1/')
-            [ -z "$VERSION" ] && VERSION="0.1.2"
+            [ -z "$VERSION" ] && VERSION="0.1.3"
           fi
           echo "Determined Release Version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -183,14 +185,15 @@ jobs:
 
       - name: Compile Standalone Executable (PyInstaller)
         run: |
-          pyinstaller --clean --noconfirm devkit.spec
-          if [ ! -f "dist/devkit" ]; then
-            echo "Error: dist/devkit was not created." >&2
+          pyinstaller --clean --noconfirm adevkit.spec
+          if [ ! -f "dist/adevkit" ]; then
+            echo "Error: dist/adevkit was not created." >&2
             exit 1
           fi
-          chmod +x dist/devkit
+          chmod +x dist/adevkit
+          cp -f dist/adevkit dist/devkit
           echo "Verifying compiled executable:"
-          ./dist/devkit info
+          ./dist/adevkit info
 
       - name: Build Linux Tarball & Debian Package (.deb)
         run: |
@@ -231,7 +234,7 @@ jobs:
             VERSION="${GITHUB_REF_NAME#v}"
           else
             VERSION=$(grep -m 1 '^version =' pyproject.toml | sed -E 's/.*"([^"]+)".*/\1/')
-            [ -z "$VERSION" ] && VERSION="0.1.2"
+            [ -z "$VERSION" ] && VERSION="0.1.3"
           fi
           echo "Determined Release Version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -245,14 +248,15 @@ jobs:
 
       - name: Compile Standalone Executable (PyInstaller)
         run: |
-          pyinstaller --clean --noconfirm devkit.spec
-          if [ ! -f "dist/devkit" ]; then
-            echo "Error: dist/devkit was not created." >&2
+          pyinstaller --clean --noconfirm adevkit.spec
+          if [ ! -f "dist/adevkit" ]; then
+            echo "Error: dist/adevkit was not created." >&2
             exit 1
           fi
-          chmod +x dist/devkit
+          chmod +x dist/adevkit
+          cp -f dist/adevkit dist/devkit
           echo "Verifying compiled executable:"
-          ./dist/devkit info
+          ./dist/adevkit info
 
       - name: Build macOS Tarball & Apple PKG Installer (.pkg)
         run: |
@@ -285,7 +289,7 @@ jobs:
             VERSION="${GITHUB_REF_NAME#v}"
           else
             VERSION=$(grep -m 1 '^version =' pyproject.toml | sed -E 's/.*"([^"]+)".*/\1/')
-            [ -z "$VERSION" ] && VERSION="0.1.2"
+            [ -z "$VERSION" ] && VERSION="0.1.3"
           fi
           echo "Determined Release Version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -358,22 +362,22 @@ jobs:
             ```
             Once installed, run:
             ```bash
-            devkit init
+            adevkit init
             ```
             
             #### 3. Native Platform Installers
             
             - **Windows**: Download and run **`AayushsDevKit-v${{ env.VERSION }}-x64.msi`**.
-              - Installs to `C:\Program Files\adevkit\`
-              - **Configures system PATH automatically** so `devkit` is globally available.
+              - Installs to `C:\Program Files\Aayush's DevKit\`
+              - **Configures system PATH automatically** so `adevkit` (and alias `devkit`) are globally available anywhere in PowerShell/CMD.
               - Portable standalone zip: **`devkit-v${{ env.VERSION }}-windows-x64.zip`**
             
             - **macOS (Apple Silicon & Intel)**:
-              - Double-click installer: **`AayushsDevKit-v${{ env.VERSION }}-macos.pkg`** (installs `devkit` directly to `/usr/local/bin`).
+              - Double-click installer: **`AayushsDevKit-v${{ env.VERSION }}-macos.pkg`** (installs `adevkit` directly to `/usr/local/bin` with `devkit` symlink).
               - Or extract archive: **`devkit-v${{ env.VERSION }}-macos-arm64.tar.gz`**
             
             - **Linux (Ubuntu / Debian / Mint)**:
-              - Debian package: `sudo dpkg -i adevkit_${{ env.VERSION }}_amd64.deb`
+              - Debian package: `sudo dpkg -i adevkit_${{ env.VERSION }}_amd64.deb` (installs `adevkit` with `devkit` symlink)
               - Or extract archive: **`devkit-v${{ env.VERSION }}-linux-x64.tar.gz`**
             
             ---
@@ -381,12 +385,12 @@ jobs:
             ### Verification & Quick Start
             Open a terminal and verify installation:
             ```bash
-            devkit info
+            adevkit info
             ```
             
             Initialize a new project:
             ```bash
-            devkit init
+            adevkit init
             ```
             
             ---

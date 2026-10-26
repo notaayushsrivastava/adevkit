@@ -1,7 +1,7 @@
 import json
 import tempfile
 from pathlib import Path
-from devkit.scaffold import (
+from adevkit.scaffold import (
     generate_agents_md,
     generate_prd_template,
     import_prd_file,
@@ -83,7 +83,7 @@ def test_setup_python_environment_standard(monkeypatch, tmp_path):
         commands_run.append(cmd)
         return 0, "Success", ""
 
-    monkeypatch.setattr("devkit.scaffold.env_setup.run_command", mock_run)
+    monkeypatch.setattr("adevkit.scaffold.env_setup.run_command", mock_run)
 
     (tmp_path / "requirements.txt").write_text("fastapi\n", encoding="utf-8")
     ok, msg = setup_python_environment(tmp_path, use_uv=False)
@@ -98,8 +98,8 @@ def test_setup_python_environment_with_uv(monkeypatch, tmp_path):
         commands_run.append(cmd)
         return 0, "Success", ""
 
-    monkeypatch.setattr("devkit.scaffold.env_setup.run_command", mock_run)
-    monkeypatch.setattr("devkit.scaffold.env_setup.which_tool", lambda tool: "/usr/bin/uv" if tool == "uv" else None)
+    monkeypatch.setattr("adevkit.scaffold.env_setup.run_command", mock_run)
+    monkeypatch.setattr("adevkit.scaffold.env_setup.which_tool", lambda tool: "/usr/bin/uv" if tool == "uv" else None)
 
     (tmp_path / "requirements.txt").write_text("fastapi\n", encoding="utf-8")
     ok, msg = setup_python_environment(tmp_path, use_uv=True)
@@ -115,9 +115,9 @@ def test_setup_python_environment_uv_fallback(monkeypatch, tmp_path):
         commands_run.append(cmd)
         return 0, "Success", ""
 
-    monkeypatch.setattr("devkit.scaffold.env_setup.run_command", mock_run)
+    monkeypatch.setattr("adevkit.scaffold.env_setup.run_command", mock_run)
     # uv is not installed
-    monkeypatch.setattr("devkit.scaffold.env_setup.which_tool", lambda tool: None)
+    monkeypatch.setattr("adevkit.scaffold.env_setup.which_tool", lambda tool: None)
 
     ok, msg = setup_python_environment(tmp_path, use_uv=True)
     assert ok is True

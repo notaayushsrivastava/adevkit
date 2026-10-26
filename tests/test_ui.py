@@ -1,5 +1,5 @@
 import pytest
-from devkit.ui import BANNER_VARIATIONS, BANNER_ART, get_random_banner, print_banner
+from adevkit.ui import BANNER_VARIATIONS, BANNER_ART, get_random_banner, print_banner
 
 def test_banner_variations_exist():
     assert len(BANNER_VARIATIONS) == 5

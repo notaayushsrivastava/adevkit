@@ -4,10 +4,10 @@ from pathlib import Path
 
 block_cipher = None
 
-embedded_skills_path = Path('devkit/skills/embedded')
+embedded_skills_path = Path('adevkit/skills/embedded')
 datas = []
 if embedded_skills_path.exists():
-    datas.append(('devkit/skills/embedded', 'devkit/skills/embedded'))
+    datas.append(('adevkit/skills/embedded', 'adevkit/skills/embedded'))
 
 upx_enabled = (sys.platform == 'win32')
 
@@ -51,7 +51,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='devkit',
+    name='adevkit',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

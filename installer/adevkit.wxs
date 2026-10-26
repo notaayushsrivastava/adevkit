@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <?ifndef Version?>
-    <?define Version = "0.1.2" ?>
+    <?define Version = "0.1.3" ?>
   <?endif?>
   <?define ProductVersion = "$(var.Version)" ?>
-  <?define Manufacturer = "Aayush" ?>
+  <?define Manufacturer = "Aayush Srivastava" ?>
   <?define ProductName = "adevkit" ?>
   <?define UpgradeCode = "e8f4a180-2a8e-4a65-8b3d-71b56a938c41" ?>
 
@@ -20,8 +20,8 @@
       InstallerVersion="405"
       Compressed="yes"
       InstallScope="perMachine"
-      Description="Aayush's DevKit - Single command project initialisation with agent skills and environments"
-      Comments="Installs Aayush's DevKit CLI and configures system PATH" />
+      Description="adevkit (Aayush's DevKit) - Single command project initialisation with agent skills and environments"
+      Comments="adevkit by Aayush Srivastava - https://aayushsrivastava.com" />
 
     <MajorUpgrade
       DowngradeErrorMessage="A newer version of $(var.ProductName) is already installed."
@@ -38,12 +38,21 @@
 
     <!-- Components -->
     <DirectoryRef Id="INSTALLFOLDER">
-      <!-- DevKit Executable Component -->
+      <!-- Primary adevkit Executable Component -->
       <Component Id="MainExecutable" Guid="3fa85f64-5717-4562-b3fc-2c963f664532" Win64="yes">
         <File
-          Id="DevKitExecutable"
-          Source="$(var.SourceDir)\devkit.exe"
+          Id="AdevkitExecutable"
+          Name="adevkit.exe"
+          Source="$(var.SourceDir)\adevkit.exe"
           KeyPath="yes" />
+      </Component>
+
+      <!-- devkit.exe Alias Component for Backward Compatibility -->
+      <Component Id="AliasExecutable" Guid="4fa85f64-5717-4562-b3fc-2c963f664533" Win64="yes">
+        <File
+          Id="DevkitExecutable"
+          Name="devkit.exe"
+          Source="$(var.SourceDir)\devkit.exe" />
       </Component>
 
       <!-- System PATH Configuration Component -->
@@ -63,6 +72,7 @@
     <!-- Feature Definition -->
     <Feature Id="MainApplication" Title="$(var.ProductName)" Level="1">
       <ComponentRef Id="MainExecutable" />
+      <ComponentRef Id="AliasExecutable" />
       <ComponentRef Id="PathEnvironment" />
     </Feature>
   </Product>

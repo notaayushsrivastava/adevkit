@@ -1,5 +1,5 @@
 from pathlib import Path
-from devkit.vault import (
+from adevkit.vault import (
     set_config,
     get_config,
     delete_config,
@@ -13,7 +13,7 @@ from devkit.vault import (
 
 def test_vault_set_and_get(tmp_path, monkeypatch):
     test_vault = tmp_path / "test_vault.json"
-    monkeypatch.setattr("devkit.vault.VAULT_FILE", test_vault)
+    monkeypatch.setattr("adevkit.vault.VAULT_FILE", test_vault)
 
     set_config("my_plain_config", "alpha-value")
     set_config("my_api_key", "sk-secret-token-998877")
@@ -39,7 +39,7 @@ def test_vault_set_and_get(tmp_path, monkeypatch):
 
 def test_vault_default_agents(tmp_path, monkeypatch):
     test_vault = tmp_path / "test_vault.json"
-    monkeypatch.setattr("devkit.vault.VAULT_FILE", test_vault)
+    monkeypatch.setattr("adevkit.vault.VAULT_FILE", test_vault)
 
     # Defaults before configuration
     assert "antigravity" in get_default_agents()
@@ -51,7 +51,7 @@ def test_vault_default_agents(tmp_path, monkeypatch):
 
 def test_vault_python_pm_preference(tmp_path, monkeypatch):
     test_vault = tmp_path / "test_vault.json"
-    monkeypatch.setattr("devkit.vault.VAULT_FILE", test_vault)
+    monkeypatch.setattr("adevkit.vault.VAULT_FILE", test_vault)
 
     assert get_preferred_python_pm() is None
     set_preferred_python_pm("uv")

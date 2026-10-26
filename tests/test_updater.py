@@ -5,7 +5,7 @@ from unittest.mock import patch, MagicMock
 from typer.testing import CliRunner
 from rich.console import Console
 
-from devkit.updater import (
+from adevkit.updater import (
     detect_installation_type,
     is_newer_version,
     parse_semver,
@@ -18,7 +18,7 @@ from devkit.updater import (
     notify_update_if_available,
     CACHE_TTL_SECONDS,
 )
-from devkit.cli import app
+from adevkit.cli import app
 
 runner = CliRunner()
 
@@ -37,6 +37,7 @@ def test_detect_installation_type(monkeypatch):
 
 
 def test_version_comparisons():
+    assert is_newer_version("0.1.3", "0.1.2") is True
     assert is_newer_version("0.1.2", "0.1.1") is True
     assert is_newer_version("1.0.0", "0.1.1") is True
     assert is_newer_version("v0.2.0", "0.1.1") is True
@@ -152,7 +153,7 @@ def test_check_update_network_error():
 
 def test_cache_lifecycle(tmp_path, monkeypatch):
     test_cache_file = tmp_path / "test_update_cache.json"
-    monkeypatch.setattr("devkit.updater.UPDATE_CACHE_FILE", test_cache_file)
+    monkeypatch.setattr("adevkit.updater.UPDATE_CACHE_FILE", test_cache_file)
 
     payload = {
         "install_type": "python",
@@ -176,7 +177,7 @@ def test_cache_lifecycle(tmp_path, monkeypatch):
 
 def test_notify_update_if_available(tmp_path, monkeypatch):
     test_cache_file = tmp_path / "test_update_cache.json"
-    monkeypatch.setattr("devkit.updater.UPDATE_CACHE_FILE", test_cache_file)
+    monkeypatch.setattr("adevkit.updater.UPDATE_CACHE_FILE", test_cache_file)
 
     # 1. When update is available
     save_cached_update({

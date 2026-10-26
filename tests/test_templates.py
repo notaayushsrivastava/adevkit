@@ -1,7 +1,7 @@
 import tempfile
 from pathlib import Path
 import pytest
-from devkit.templates import (
+from adevkit.templates import (
     BUILTIN_TEMPLATES,
     NextjsTemplate,
     PythonFastAPITemplate,

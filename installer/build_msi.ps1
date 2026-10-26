@@ -16,12 +16,12 @@ if (-not $Version -or $Version.Trim() -eq "") {
     }
 }
 if (-not $Version) {
-    $Version = "0.1.2"
+    $Version = "0.1.3"
 }
 $Version = $Version.Trim().TrimStart('v')
 # WiX requires x.x.x or x.x.x.x
 if ($Version -notmatch '^\d+(\.\d+){1,3}$') {
-    $Version = "0.1.2"
+    $Version = "0.1.3"
 }
 
 Write-Host "========================================" -ForegroundColor Cyan
@@ -34,6 +34,23 @@ New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 $MsiOutput = Join-Path $OutputDir "AayushsDevKit-v$Version-x64.msi"
 $SourceDir = (Resolve-Path $DistDir).Path
 
+# Ensure both adevkit.exe and devkit.exe exist so all triggers work
+$adevkitExe = Join-Path $SourceDir "adevkit.exe"
+$devkitExe = Join-Path $SourceDir "devkit.exe"
+if ((Test-Path $adevkitExe) -and !(Test-Path $devkitExe)) {
+    Copy-Item $adevkitExe $devkitExe -Force
+} elseif ((Test-Path $devkitExe) -and !(Test-Path $adevkitExe)) {
+    Copy-Item $devkitExe $adevkitExe -Force
+}
+
+if (!(Test-Path $adevkitExe)) {
+    Write-Error "Executable adevkit.exe not found in $SourceDir"
+    exit 1
+}
+
+# Check for WiX source file (prefer adevkit.wxs)
+$wxsFile = if (Test-Path "installer\adevkit.wxs") { "installer\adevkit.wxs" } else { "installer\devkit.wxs" }
+
 # Check for WiX v4 (wix.exe)
 $wixV4 = Get-Command "wix" -ErrorAction SilentlyContinue
 
@@ -43,7 +60,7 @@ $light = Get-Command "light.exe" -ErrorAction SilentlyContinue
 
 if ($wixV4) {
     Write-Host "Using WiX v4 CLI to build MSI..." -ForegroundColor Green
-    & wix build "installer\devkit.wxs" `
+    & wix build $wxsFile `
         -d Version=$Version `
         -d SourceDir=$SourceDir `
         -o $MsiOutput
@@ -56,7 +73,7 @@ if ($wixV4) {
     $ObjDir = Join-Path $OutputDir "obj"
     New-Item -ItemType Directory -Path $ObjDir -Force | Out-Null
     
-    $WixObj = Join-Path $ObjDir "devkit.wixobj"
+    $WixObj = Join-Path $ObjDir "adevkit.wixobj"
     
     $candleArgs = @(
         "-nologo",
@@ -64,7 +81,7 @@ if ($wixV4) {
         "-dVersion=$Version",
         "-dSourceDir=$SourceDir",
         "-out", $WixObj,
-        "installer\devkit.wxs"
+        $wxsFile
     )
     Write-Host "Invoking candle with Version=$Version" -ForegroundColor Cyan
     & candle.exe @candleArgs

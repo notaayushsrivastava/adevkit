@@ -1,8 +1,8 @@
 import json
 import tempfile
 from pathlib import Path
-from devkit.skills.installer import install_skills
-from devkit.skills.catalog import AVAILABLE_SKILLS, get_recommended_skills_for_template
+from adevkit.skills.installer import install_skills
+from adevkit.skills.catalog import AVAILABLE_SKILLS, get_recommended_skills_for_template
 
 def test_install_skills():
     with tempfile.TemporaryDirectory() as tmpdir:

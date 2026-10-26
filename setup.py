@@ -2,7 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     name="adevkit",
-    version="0.1.2",
+    version="0.1.3",
+    author="Aayush Srivastava",
+    author_email="contact@aayushsrivastava.com",
+    url="https://aayushsrivastava.com",
     packages=find_packages(),
     include_package_data=True,
     package_data={
@@ -17,8 +20,8 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "devkit=devkit.cli:main",
-            "adevkit=devkit.cli:main",
+            "adevkit=adevkit.cli:main",
+            "devkit=adevkit.cli:main",
         ],
     },
 )

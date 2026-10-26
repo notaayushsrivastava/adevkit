@@ -1,4 +1,4 @@
 include README.md
 include LICENSE
-recursive-include devkit/skills/embedded *
+recursive-include adevkit/skills/embedded *
 global-exclude *.py[cod] __pycache__ *.so

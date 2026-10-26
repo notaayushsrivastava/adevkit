@@ -1,5 +1,5 @@
 from pathlib import Path
-from devkit.scaffold.agent_configs import scaffold_agent_configs, SUPPORTED_AGENTS
+from adevkit.scaffold.agent_configs import scaffold_agent_configs, SUPPORTED_AGENTS
 
 
 def test_scaffold_all_agent_configs(tmp_path):

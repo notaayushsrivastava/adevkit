@@ -1,5 +1,5 @@
 from pathlib import Path
-from devkit.readmes import (
+from adevkit.readmes import (
     list_readme_templates,
     get_readme_template,
     save_custom_readme,
@@ -41,7 +41,7 @@ def test_render_readme_placeholders():
 def test_custom_readme_lifecycle(tmp_path, monkeypatch):
     test_readme_dir = tmp_path / "user_readmes"
     test_readme_dir.mkdir()
-    monkeypatch.setattr("devkit.readmes.USER_README_DIR", test_readme_dir)
+    monkeypatch.setattr("adevkit.readmes.USER_README_DIR", test_readme_dir)
 
     custom_text = """# {{project_name}} (Internal Microservice)
 

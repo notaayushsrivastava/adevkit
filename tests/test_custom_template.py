@@ -1,6 +1,6 @@
 import tempfile
 from pathlib import Path
-from devkit.templates.custom import (
+from adevkit.templates.custom import (
     save_custom_template,
     list_custom_templates,
     delete_custom_template,
@@ -12,7 +12,7 @@ def test_custom_template_lifecycle(monkeypatch):
         # Patch USER_TEMPLATES_DIR to a temporary folder
         mock_templates_dir = Path(tmp_user_dir) / "templates"
         mock_templates_dir.mkdir(parents=True, exist_ok=True)
-        monkeypatch.setattr("devkit.templates.custom.USER_TEMPLATES_DIR", mock_templates_dir)
+        monkeypatch.setattr("adevkit.templates.custom.USER_TEMPLATES_DIR", mock_templates_dir)
 
         # 1. Create a source project folder to snapshot
         with tempfile.TemporaryDirectory() as src_dir:

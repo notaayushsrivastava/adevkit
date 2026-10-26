@@ -9,10 +9,11 @@
 
 # adevkit (Aayush's DevKit)
 
-> **One-Command Project Scaffolding with Agentic Skills, AI Assistant Guidelines & Environment Setup**
-
+> **One-Command Project Scaffolding with Agentic Skills, AI Assistant Guidelines & Environment Setup**  
+> Developed and published by **[Aayush Srivastava](https://aayushsrivastava.com)**
 
 [![adevkit Builds](https://github.com/notaayushsrivastava/adevkit/actions/workflows/release.yml/badge.svg)](https://github.com/notaayushsrivastava/adevkit/actions/workflows/release.yml)
+[![Website](https://img.shields.io/badge/Author-Aayush%20Srivastava-blue)](https://aayushsrivastava.com)
 
 **adevkit** (Aayush's DevKit) is a fast, interactive developer toolkit CLI designed to initialize production-ready projects in seconds. It handles everything: asking project names, generating tailored codebases, selecting target AI coding assistants (Antigravity, Cursor, Claude Code, GitHub Copilot, Windsurf, Aider), auto-installing curated and custom AI agent skills (like `skills.sh`), creating comprehensive specifications, securely storing API credentials (with Windows DPAPI encryption), and setting up isolated Python virtual environments, Git, Node packages, and VSCode settings.
 
@@ -33,9 +34,9 @@
   9. `expo_mobile`: Cross-platform mobile starter with React Native, Expo SDK, and TypeScript.
   10. `expo_fullstack`: Monorepo with Expo React Native mobile `frontend/` and selectable `backend/` (FastAPI or Node.js Hono).
 - **Custom Template Engine**:
-  - `devkit template save <NAME>`: Snapshot any existing directory or repo into reusable custom templates saved in `~/.aayush-devkit/templates/`.
-  - `devkit template list`: View all built-in and custom templates.
-  - `devkit template delete <NAME>`: Cleanly remove saved templates.
+  - `adevkit template save <NAME>`: Snapshot any existing directory or repo into reusable custom templates saved in `~/.adevkit/templates/`.
+  - `adevkit template list`: View all built-in and custom templates.
+  - `adevkit template delete <NAME>`: Cleanly remove saved templates.
 - **42 Embedded Curated Agent Skills**:
   - Direct, 100% offline access to all curated skills with automatic `.agents/skills/` population and valid `skills-lock.json` generation.
   - Sourced from top engineering leaders:
@@ -58,7 +59,7 @@
 - **Automatic Multi-Channel Update Checker**:
   - Automatically identifies whether running as a Python package (`adevkit` via PyPI) or native Windows MSI installer (via GitHub Releases).
   - Background, non-blocking check with 24-hour smart caching in `~/.aayush-devkit/update_cache.json`.
-  - Manual check command via `devkit check-update` (`--type python`, `--type msi`, or `--type all`).
+  - Manual check command via `adevkit check-update` (`--type python`, `--type msi`, or `--type all`).
 
 ---
 
@@ -68,9 +69,9 @@
 ```bash
 pip install --upgrade adevkit
 ```
-Now run `devkit` or `adevkit` anywhere in your terminal:
+Now run `adevkit` anywhere in your terminal (shorthand `devkit` is also supported):
 ```bash
-devkit init
+adevkit init
 ```
 
 ### 2. Universal 1-Line Installer (Linux & macOS)
@@ -79,17 +80,17 @@ curl -fsSL https://raw.githubusercontent.com/notaayushsrivastava/adevkit/main/in
 ```
 
 ### 3. Native Platform Installers
-- **Windows**: Download and run [`AayushsDevKit-v0.1.2-x64.msi`](https://github.com/notaayushsrivastava/adevkit/releases). It automatically configures `devkit` in your system `PATH`.
-- **macOS**: Download and run [`AayushsDevKit-v0.1.2-macos.pkg`](https://github.com/notaayushsrivastava/adevkit/releases) (or extract `devkit-v0.1.2-macos-arm64.tar.gz`).
-- **Linux (Debian/Ubuntu)**: Download [`adevkit_0.1.2_amd64.deb`](https://github.com/notaayushsrivastava/adevkit/releases) and run `sudo dpkg -i adevkit_0.1.2_amd64.deb` (or extract `devkit-v0.1.2-linux-x64.tar.gz`).
+- **Windows**: Download and run [`AayushsDevKit-v0.1.3-x64.msi`](https://github.com/notaayushsrivastava/adevkit/releases). It automatically configures `adevkit` (and alias `devkit`) in your system `PATH`.
+- **macOS**: Download and run [`AayushsDevKit-v0.1.3-macos.pkg`](https://github.com/notaayushsrivastava/adevkit/releases) (or extract `devkit-v0.1.3-macos-arm64.tar.gz`).
+- **Linux (Debian/Ubuntu)**: Download [`adevkit_0.1.3_amd64.deb`](https://github.com/notaayushsrivastava/adevkit/releases) and run `sudo dpkg -i adevkit_0.1.3_amd64.deb` (or extract `devkit-v0.1.3-linux-x64.tar.gz`).
 
-### 3. Run Directly from Source
+### 4. Run Directly from Source
 ```powershell
 python app.py
 ```
 Or with Windows command script:
 ```powershell
-.\devkit.cmd
+.\adevkit.cmd
 ```
 
 ---
@@ -99,28 +100,28 @@ Or with Windows command script:
 ### Initialize a New Project
 ```powershell
 # Interactive wizard
-devkit init
+adevkit init
 
 # Specify name and target directory
-devkit init my-saas -t saas_fullstack
+adevkit init my-saas -t saas_fullstack
 
 # Non-interactive / CI mode
-devkit init my-app -t nextjs -s ponytail -s impeccable -s design-taste-frontend --yes
+adevkit init my-app -t nextjs -s ponytail -s impeccable -s design-taste-frontend --yes
 ```
 
 ### Manage Custom Templates
 ```powershell
 # Snapshot current folder as a reusable template
-devkit template save my-starter --desc "Company internal microservice"
+adevkit template save my-starter --desc "Company internal microservice"
 
 # Snapshot specific folder
-devkit template save my-starter --path "C:\path\to\project"
+adevkit template save my-starter --path "C:\path\to\project"
 
 # List all available templates (built-in and custom)
-devkit template list
+adevkit template list
 
 # Delete a custom template
-devkit template delete my-starter
+adevkit template delete my-starter
 ```
 
 ### Manage Agent Skills (skills.sh compatible)
@@ -214,8 +215,14 @@ The test suite covers all 10 templates, custom template snapshots, skills instal
 
 ---
 
+## Author & Publisher
+
+Developed and maintained by **[Aayush Srivastava](https://aayushsrivastava.com)**.
+- **Website**: [aayushsrivastava.com](https://aayushsrivastava.com)
+- **GitHub**: [@notaayushsrivastava](https://github.com/notaayushsrivastava)
+
+---
+
 ## License
 
-MIT License
-
-Copyright (c) 2026-Present Aayush Srivastava
+MIT License (c) 2026-Present [Aayush Srivastava](https://aayushsrivastava.com). All rights reserved.

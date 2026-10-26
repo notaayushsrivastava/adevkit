@@ -22,7 +22,7 @@ UPDATE_CACHE_FILE = USER_DEVKIT_DIR / "update_cache.json"
 
 # Package directory containing embedded default skills/templates
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-    PACKAGE_ROOT = Path(sys._MEIPASS) / "devkit"
+    PACKAGE_ROOT = Path(sys._MEIPASS) / "adevkit"
 else:
     PACKAGE_ROOT = Path(__file__).parent.resolve()
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${1:-0.1.2}"
+VERSION="${1:-0.1.3}"
 DIST_DIR="${2:-dist}"
 OUTPUT_DIR="${3:-output}"
 ARCH="${4:-$(uname -m)}"
@@ -12,18 +12,24 @@ echo "========================================"
 
 mkdir -p "${OUTPUT_DIR}"
 
-BINARY_PATH="${DIST_DIR}/devkit"
-if [ ! -f "${BINARY_PATH}" ]; then
-    echo "Error: Binary not found at ${BINARY_PATH}" >&2
+# 1. Verify dist binary exists and ensure both adevkit and devkit triggers exist
+if [ -f "${DIST_DIR}/adevkit" ]; then
+    BINARY_PATH="${DIST_DIR}/adevkit"
+    cp -f "${DIST_DIR}/adevkit" "${DIST_DIR}/devkit"
+elif [ -f "${DIST_DIR}/devkit" ]; then
+    BINARY_PATH="${DIST_DIR}/devkit"
+    cp -f "${DIST_DIR}/devkit" "${DIST_DIR}/adevkit"
+else
+    echo "Error: Neither adevkit nor devkit binary found in ${DIST_DIR}" >&2
     exit 1
 fi
 
-chmod +x "${BINARY_PATH}"
+chmod +x "${DIST_DIR}/adevkit" "${DIST_DIR}/devkit"
 
-# 1. Package tar.gz standalone archive
+# 1. Package tar.gz standalone archive with both triggers
 TARBALL_NAME="devkit-v${VERSION}-macos-${ARCH}.tar.gz"
 echo "[+] Creating standalone tarball: ${OUTPUT_DIR}/${TARBALL_NAME}"
-tar -czf "${OUTPUT_DIR}/${TARBALL_NAME}" -C "${DIST_DIR}" devkit
+tar -czf "${OUTPUT_DIR}/${TARBALL_NAME}" -C "${DIST_DIR}" adevkit devkit
 
 # 2. Build Apple Installer Package (.pkg)
 if command -v pkgbuild >/dev/null 2>&1; then
@@ -31,13 +37,14 @@ if command -v pkgbuild >/dev/null 2>&1; then
     rm -rf "${PKG_ROOT}"
     mkdir -p "${PKG_ROOT}/usr/local/bin"
 
-    cp "${BINARY_PATH}" "${PKG_ROOT}/usr/local/bin/devkit"
-    chmod 755 "${PKG_ROOT}/usr/local/bin/devkit"
+    cp "${DIST_DIR}/adevkit" "${PKG_ROOT}/usr/local/bin/adevkit"
+    ln -sf "adevkit" "${PKG_ROOT}/usr/local/bin/devkit"
+    chmod 755 "${PKG_ROOT}/usr/local/bin/adevkit"
 
     PKG_NAME="AayushsDevKit-v${VERSION}-macos.pkg"
     echo "[+] Building Apple PKG package: ${OUTPUT_DIR}/${PKG_NAME}"
     pkgbuild --root "${PKG_ROOT}" \
-             --identifier "com.aayush.adevkit" \
+             --identifier "com.aayushsrivastava.adevkit" \
              --version "${VERSION}" \
              --install-location "/" \
              "${OUTPUT_DIR}/${PKG_NAME}"

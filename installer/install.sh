@@ -49,7 +49,7 @@ echo "[*] Detected OS: ${PLATFORM}, Architecture: ${ARCH_TAG}"
 # Get latest release tag
 LATEST_TAG=$(curl -s "https://api.github.com/repos/${REPO}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 if [ -z "${LATEST_TAG}" ]; then
-    LATEST_TAG="v0.1.2"
+    LATEST_TAG="v0.1.3"
 fi
 
 VERSION="${LATEST_TAG#v}"
@@ -77,18 +77,24 @@ fi
 echo "[*] Extracting..."
 tar -xzf "${TMP_DIR}/${TARBALL_NAME}" -C "${TMP_DIR}"
 
-if [ ! -f "${TMP_DIR}/devkit" ]; then
-    echo "Error: devkit executable not found in archive." >&2
+if [ -f "${TMP_DIR}/adevkit" ]; then
+    PRIMARY_BIN="${TMP_DIR}/adevkit"
+elif [ -f "${TMP_DIR}/devkit" ]; then
+    PRIMARY_BIN="${TMP_DIR}/devkit"
+else
+    echo "Error: Neither adevkit nor devkit executable found in archive." >&2
     exit 1
 fi
 
-chmod +x "${TMP_DIR}/devkit"
+chmod +x "${PRIMARY_BIN}"
 
-echo "[*] Installing to ${INSTALL_DIR}/devkit..."
+echo "[*] Installing triggers to ${INSTALL_DIR} (adevkit and devkit)..."
 if [ -w "${INSTALL_DIR}" ]; then
-    cp "${TMP_DIR}/devkit" "${INSTALL_DIR}/devkit"
+    cp "${PRIMARY_BIN}" "${INSTALL_DIR}/adevkit"
+    ln -sf "adevkit" "${INSTALL_DIR}/devkit" 2>/dev/null || cp "${PRIMARY_BIN}" "${INSTALL_DIR}/devkit"
 else
-    sudo cp "${TMP_DIR}/devkit" "${INSTALL_DIR}/devkit"
+    sudo cp "${PRIMARY_BIN}" "${INSTALL_DIR}/adevkit"
+    sudo ln -sf "adevkit" "${INSTALL_DIR}/devkit" 2>/dev/null || sudo cp "${PRIMARY_BIN}" "${INSTALL_DIR}/devkit"
 fi
 
 if [[ ":$PATH:" != *":${INSTALL_DIR}:"* ]]; then
@@ -97,5 +103,5 @@ if [[ ":$PATH:" != *":${INSTALL_DIR}:"* ]]; then
     echo "    export PATH=\"${INSTALL_DIR}:\$PATH\""
 fi
 
-echo "[+] adevkit v${VERSION} installed successfully!"
-"${INSTALL_DIR}/devkit" info || true
+echo "[+] adevkit v${VERSION} installed successfully! (Both 'adevkit' and 'devkit' commands available)"
+"${INSTALL_DIR}/adevkit" info || true

@@ -1,7 +1,7 @@
 from prompt_toolkit.output import DummyOutput
 from prompt_toolkit.application import create_app_session
-from devkit.prompts import prompt_template_selection
-from devkit.templates import get_all_templates
+from adevkit.prompts import prompt_template_selection
+from adevkit.templates import get_all_templates
 
 def test_template_selection_rendering():
     """Verify prompt_template_selection initializes and formats properly."""
