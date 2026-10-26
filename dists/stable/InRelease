@@ -1,0 +1,38 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Architectures: amd64
+Codename: stable
+Components: main
+Date: Mon, 26 Oct 2026 14:08:21 +0000
+Label: notaayushsrivastava.adevkit
+Origin: notaayushsrivastava.adevkit
+Suite: stable
+MD5Sum:
+ fdf1c1ed737912c578fddfc4493176f0              760 main/binary-amd64/Packages
+ e04eb1b86d624518ee05221b30194a35              505 main/binary-amd64/Packages.gz
+SHA1:
+ e96ef0477108ad49a94e173844c6a5888add285b              760 main/binary-amd64/Packages
+ b73647103411e509c83e871a6fdb9803923465a1              505 main/binary-amd64/Packages.gz
+SHA256:
+ ccffd62869f1314403e04af169d1fc24bf30b146bdb3d8fde457306b84d26b34              760 main/binary-amd64/Packages
+ a5801a29643e7d9576a1aada8903497464be36b10f9373a1cde243edaece9eb1              505 main/binary-amd64/Packages.gz
+SHA512:
+ d185db35545732ceeb501534c9cbef5eb57ddfd3e574735754eb9d4176a372ca012f6d7fdd87651ad0b19477ef938a83e35ebae44fa076cc4782cb880d4ad297              760 main/binary-amd64/Packages
+ 4cb3ef1e0ba9c8d2ffa00c77f1cfddc1e2fc064b0e1056a8944c543c63df171103e19184767a127898b81f8df43684d9698f3019d1742b2712655ccd59f2f58b              505 main/binary-amd64/Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCgAdFiEEkBuzLmvnKqdmSSmw8t5t/WlzrGgFAmrfXtYACgkQ8t5t/Wlz
+rGihPA//dzM7bBk+WgC6ReiRBZsC5FCeUX6o51duYVszyTxiw16LSPXg3Kick/wm
+8rLcfV34+FRfve3Ul+dJT7kfUKQIp/gvRgCC+SKY52WheYgrx/bDPIQTVkrr/6JA
+QXFeFLo33THwFDx7WKygV6rsSXjccTDdjLpVV9biYA7jCiOYhHuQVZZOpBiiA5VL
+tHmvkCrsG1HfnUeNHUJxBhQ/T+ZuJdDcfE8G+Zww5P/MZ87fD+5RvBvGnbkGZae8
+AwsWQcjVh/JL6/ylrDuWY7687AiszWRQ7yL2V2Ixz7PzBWYJv9hHxwW2BUsGVogI
+vcnWq0RVXBhBsVxkGy3mROdZJycCSIqTgo/XxqvPSXbFltcOyVzDK5aJHX8QqRom
+c7JrLm/RYy1uYNH4XaUVkv+0wP0XrrJbcchtElmTrY4DqM+xKivPOCDZLRxSkd4u
+HdpSdNil1S5uaY8m6eVY7XYZ3dzPOWL3gi5EEBToHH9e9S/mm01UIdGwNewnFqGl
+5gFcfKvQrTtvaOmefXNMsOqaUtzzCd2XqwtCcvuj2uoH1NeJA86xLmR4empiojTM
+CvSt0QoWzcKo9EB1miSdvoo4og8xYtyrK3LP+SJbbIQvUBMkRKXnPT7MsKPvO6jY
+sdmu9hxj8Vb35iuNDWXpv7m1rdYT6Bg2IkG6t3fP1g8RO/LAknk=
+=vD+c
+-----END PGP SIGNATURE-----

@@ -1,0 +1,17 @@
+Package: notaayushsrivastava.adevkit
+Architecture: amd64
+Version: 0.1.4
+Priority: optional
+Section: utils
+Maintainer: Aayush Srivastava <contact@aayushsrivastava.com>
+Provides: adevkit
+Filename: pool/main/n/notaayushsrivastava.adevkit/notaayushsrivastava.adevkit_0.1.4_amd64.deb
+Size: 43282910
+MD5sum: 1af6d19bd08c5439640282a42b4c7bca
+SHA1: a39fa2be923e76d02ded348d15f3fa65c4b14532
+SHA256: 68af5dc3dc3cadca7f6776b296689ee2782b6067760a62856f85334e6ba9af43
+SHA512: 93594de434c38bcb38b40afcb15b71e71eb0f7020da5b9874f85942c2d3ed32d3ce27604f48548ce7e1163112449aa8564ffd5e6e099f2c3aac18ff7667e9872
+Homepage: https://aayushsrivastava.com
+Description: adevkit (Aayush's DevKit)
+ Single-command project initialization with Agentic skills, AI agents, and environments.
+
