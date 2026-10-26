@@ -1,6 +1,17 @@
 import os
 import sys
 from pathlib import Path
+
+# Windows consoles may use a legacy code page (for example cp1252) that cannot
+# encode Unicode symbols used by Rich/Typer (such as ⚡). Force UTF-8 output
+# where supported, and replace any unsupported characters as a safe fallback.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        try:
+            _stream.reconfigure(encoding="utf-8", errors="replace")
+        except (OSError, ValueError):
+            pass
+
 from typing import Optional, List, Annotated
 import typer
 from rich.table import Table
