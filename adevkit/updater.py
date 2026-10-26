@@ -124,7 +124,7 @@ def check_binary_update(
                             name = asset.get("name", "").lower()
                             if name.endswith(".msi"):
                                 matched_asset_url = asset.get("browser_download_url")
-                                update_instruction = f"Download MSI installer: {matched_asset_url}"
+                                update_instruction = f"winget upgrade notaayushsrivastava.adevkit (or download: {matched_asset_url})"
                                 break
                     elif plat.startswith("linux"):
                         for asset in assets:

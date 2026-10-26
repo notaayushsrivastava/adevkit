@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${1:-0.1.3}"
+VERSION="${1:-0.1.4}"
 DIST_DIR="${2:-dist}"
 OUTPUT_DIR="${3:-output}"
 
@@ -42,7 +42,8 @@ if command -v dpkg-deb >/dev/null 2>&1; then
     chmod 755 "${DEB_DIR}/usr/local/bin/adevkit"
 
     cat <<EOF > "${DEB_DIR}/DEBIAN/control"
-Package: adevkit
+Package: notaayushsrivastava.adevkit
+Provides: adevkit
 Version: ${VERSION}
 Section: utils
 Priority: optional
@@ -53,9 +54,11 @@ Description: adevkit (Aayush's DevKit)
  Single-command project initialization with Agentic skills, AI agents, and environments.
 EOF
 
-    DEB_NAME="adevkit_${VERSION}_amd64.deb"
+    DEB_NAME="notaayushsrivastava.adevkit_${VERSION}_amd64.deb"
     echo "[+] Building Debian package: ${OUTPUT_DIR}/${DEB_NAME}"
     dpkg-deb --build --root-owner-group "${DEB_DIR}" "${OUTPUT_DIR}/${DEB_NAME}"
+    # Keep legacy/short name alias for direct downloads
+    cp -f "${OUTPUT_DIR}/${DEB_NAME}" "${OUTPUT_DIR}/adevkit_${VERSION}_amd64.deb"
     rm -rf "${DEB_DIR}"
 fi
 

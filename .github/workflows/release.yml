@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       release_version:
-        description: 'Version tag override (e.g. 0.1.3). Leave empty to read from pyproject.toml'
+        description: 'Version tag override (e.g. 0.1.4). Leave empty to read from pyproject.toml'
         required: false
         default: ''
 
@@ -36,7 +36,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.15'
           cache: 'pip'
 
       - name: Install Dependencies & Test Tools
@@ -65,7 +65,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.15'
           cache: 'pip'
 
       - name: Determine Release Version
@@ -82,7 +82,7 @@ jobs:
             if ($content -match 'version\s*=\s*["'']([^"'']+)["'']') {
               $version = $matches[1]
             } else {
-              $version = "0.1.3"
+              $version = "0.1.4"
             }
           }
           Write-Host "Determined Release Version: $version" -ForegroundColor Green
@@ -126,7 +126,7 @@ jobs:
         shell: pwsh
         run: |
           choco install wixtoolset -y --no-progress
-          $wixPath = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+          $wixPath = "C:\Program Files (x86)\WiX Toolset v3.15\bin"
           if (Test-Path $wixPath) {
             echo "$wixPath" >> $env:GITHUB_PATH
           }
@@ -134,7 +134,7 @@ jobs:
       - name: Build Native Windows MSI Installer
         shell: pwsh
         run: |
-          $env:PATH = "C:\Program Files (x86)\WiX Toolset v3.11\bin;$env:PATH"
+          $env:PATH = "C:\Program Files (x86)\WiX Toolset v3.15\bin;$env:PATH"
           .\installer\build_msi.ps1 -Version $env:VERSION -DistDir "dist" -OutputDir "output"
 
       - name: Upload Windows Artifacts
@@ -158,7 +158,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.15'
           cache: 'pip'
 
       - name: Determine Release Version
@@ -171,7 +171,7 @@ jobs:
             VERSION="${GITHUB_REF_NAME#v}"
           else
             VERSION=$(grep -m 1 '^version =' pyproject.toml | sed -E 's/.*"([^"]+)".*/\1/')
-            [ -z "$VERSION" ] && VERSION="0.1.3"
+            [ -z "$VERSION" ] && VERSION="0.1.4"
           fi
           echo "Determined Release Version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -221,7 +221,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.15'
           cache: 'pip'
 
       - name: Determine Release Version
@@ -234,7 +234,7 @@ jobs:
             VERSION="${GITHUB_REF_NAME#v}"
           else
             VERSION=$(grep -m 1 '^version =' pyproject.toml | sed -E 's/.*"([^"]+)".*/\1/')
-            [ -z "$VERSION" ] && VERSION="0.1.3"
+            [ -z "$VERSION" ] && VERSION="0.1.4"
           fi
           echo "Determined Release Version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -289,7 +289,7 @@ jobs:
             VERSION="${GITHUB_REF_NAME#v}"
           else
             VERSION=$(grep -m 1 '^version =' pyproject.toml | sed -E 's/.*"([^"]+)".*/\1/')
-            [ -z "$VERSION" ] && VERSION="0.1.3"
+            [ -z "$VERSION" ] && VERSION="0.1.4"
           fi
           echo "Determined Release Version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -305,6 +305,7 @@ jobs:
           mkdir -p output
           find downloaded_artifacts -type f -exec cp {} output/ \;
           cp installer/install.sh output/install.sh
+          cp installer/install-apt.sh output/install-apt.sh
           echo "Collected release artifacts in output/:"
           ls -la output/
 
@@ -341,6 +342,7 @@ jobs:
             output/*.whl
             output/*.tar.gz
             output/install.sh
+            output/install-apt.sh
             output/SHA256SUMS.txt
           body: |
             ## adevkit (${{ env.TAG_NAME }}) - Aayush's DevKit
@@ -377,7 +379,7 @@ jobs:
               - Or extract archive: **`devkit-v${{ env.VERSION }}-macos-arm64.tar.gz`**
             
             - **Linux (Ubuntu / Debian / Mint)**:
-              - Debian package: `sudo dpkg -i adevkit_${{ env.VERSION }}_amd64.deb` (installs `adevkit` with `devkit` symlink)
+              - Debian package: `sudo dpkg -i notaayushsrivastava.adevkit_${{ env.VERSION }}_amd64.deb` (or via APT: `sudo apt install notaayushsrivastava.adevkit`)
               - Or extract archive: **`devkit-v${{ env.VERSION }}-linux-x64.tar.gz`**
             
             ---
@@ -413,7 +415,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.15'
           cache: 'pip'
 
       - name: Install Build Tools

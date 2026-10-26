@@ -37,6 +37,7 @@ def test_detect_installation_type(monkeypatch):
 
 
 def test_version_comparisons():
+    assert is_newer_version("0.1.4", "0.1.3") is True
     assert is_newer_version("0.1.3", "0.1.2") is True
     assert is_newer_version("0.1.2", "0.1.1") is True
     assert is_newer_version("1.0.0", "0.1.1") is True

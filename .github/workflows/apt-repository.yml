@@ -1,0 +1,52 @@
+name: Publish adevkit APT repository
+
+on:
+  workflow_run:
+    workflows: ["Build, Release & Publish adevkit"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Linux package
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-artifacts
+          path: packages
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine package version
+        id: version
+        run: |
+          VERSION="$(find packages -maxdepth 1 \( -name 'notaayushsrivastava.adevkit_*_amd64.deb' -o -name 'adevkit_*_amd64.deb' \) -printf '%f\n' | sed -E 's/^(notaayushsrivastava\.)?adevkit_([^_]+)_amd64\.deb$/\2/' | head -n 1)"
+          test -n "$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Install repository tools
+        run: sudo apt-get update && sudo apt-get install --yes apt-utils gnupg
+
+      - name: Build signed repository
+        env:
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+        run: |
+          test -n "$APT_GPG_PRIVATE_KEY"
+          chmod +x installer/build_apt_repo.sh
+          ./installer/build_apt_repo.sh "${{ steps.version.outputs.version }}" packages apt-repo
+
+      - name: Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: apt-repo
+          force_orphan: true

@@ -1,0 +1,131 @@
+name: Submit to Windows Package Manager (WinGet)
+
+on:
+  workflow_run:
+    workflows: ["Build, Release & Publish adevkit"]
+    types: [completed]
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Version tag override (e.g. 0.1.4). Leave empty to read from pyproject.toml'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  publish-winget:
+    name: Generate & Submit WinGet Manifest
+    if: ${{ github.event_name == 'release' || github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine Release Version
+        id: version
+        shell: pwsh
+        run: |
+          $verInput = "${{ github.event.inputs.release_version }}".Trim()
+          if ($verInput) {
+            $version = $verInput.TrimStart('v')
+          } elseif ('${{ github.event_name }}' -eq 'release') {
+            $version = "${{ github.event.release.tag_name }}".TrimStart('v')
+          } else {
+            $content = Get-Content "pyproject.toml" -Raw
+            if ($content -match 'version\s*=\s*["'']([^"'']+)["'']') {
+              $version = $matches[1]
+            } else {
+              $version = "0.1.4"
+            }
+          }
+          Write-Host "Target Version for WinGet: $version" -ForegroundColor Green
+          "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "TAG_NAME=v$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Download Windows Artifacts (workflow_run)
+        if: ${{ github.event_name == 'workflow_run' }}
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: windows-artifacts
+          path: output
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download MSI Installer from GitHub Release (Fallback)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path "output" -Force | Out-Null
+          $msiPath = "output\AayushsDevKit-v$env:VERSION-x64.msi"
+          if (!(Test-Path $msiPath)) {
+            $url = "https://github.com/${{ github.repository }}/releases/download/$env:TAG_NAME/AayushsDevKit-v$env:VERSION-x64.msi"
+            Write-Host "Attempting download of published MSI from $url..." -ForegroundColor Cyan
+            try {
+              Invoke-WebRequest -Uri $url -OutFile $msiPath -ErrorAction Stop
+              Write-Host "Successfully downloaded $msiPath" -ForegroundColor Green
+            } catch {
+              Write-Host "Notice: Release asset not yet downloadable from URL or not published yet ($url). Using manifest templates." -ForegroundColor Yellow
+            }
+          }
+
+      - name: Generate and Validate WinGet Manifest
+        shell: pwsh
+        run: |
+          .\installer\build_winget_manifest.ps1 -Version "$env:VERSION" -Repo "${{ github.repository }}" -Validate
+
+      - name: Upload WinGet Manifests Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: winget-manifests
+          path: installer/winget/manifests/**
+
+      - name: Setup .NET 9 Runtime
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Download wingetcreate CLI
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://aka.ms/wingetcreate/latest" -OutFile "wingetcreate.exe"
+          Write-Host "Downloaded wingetcreate CLI tool." -ForegroundColor Green
+
+      - name: Submit Pull Request to microsoft/winget-pkgs
+        shell: pwsh
+        env:
+          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN || secrets.WINGET_CREATE_GITHUB_TOKEN }}
+        run: |
+          $packageId = "notaayushsrivastava.adevkit"
+          $msiUrl = "https://github.com/${{ github.repository }}/releases/download/$env:TAG_NAME/AayushsDevKit-v$env:VERSION-x64.msi"
+
+          if (-not $env:WINGET_TOKEN -or $env:WINGET_TOKEN.Trim() -eq "") {
+            Write-Host "::warning::WINGET_TOKEN (or WINGET_CREATE_GITHUB_TOKEN) secret is not configured."
+            Write-Host "To enable automated WinGet submissions to microsoft/winget-pkgs:"
+            Write-Host "1. Create a GitHub Personal Access Token (Classic) with 'public_repo' and 'workflow' scopes."
+            Write-Host "2. Fork 'microsoft/winget-pkgs' to your GitHub account."
+            Write-Host "3. Add the token to Repository Settings -> Secrets and variables -> Actions as 'WINGET_TOKEN'."
+            Write-Host "WinGet manifests have been successfully validated and uploaded as artifacts in this run."
+            exit 0
+          }
+
+          $env:WINGET_CREATE_GITHUB_TOKEN = $env:WINGET_TOKEN
+
+          Write-Host "Submitting package update for $packageId ($env:VERSION) to microsoft/winget-pkgs..." -ForegroundColor Cyan
+          try {
+            & .\wingetcreate.exe update $packageId --version "$env:VERSION" --urls "$msiUrl|x64" --token "$env:WINGET_TOKEN" --submit
+            if ($LASTEXITCODE -eq 0) {
+              Write-Host "[+] Successfully created Pull Request in microsoft/winget-pkgs!" -ForegroundColor Green
+            } else {
+              Write-Host "Notice: 'wingetcreate update' returned code $LASTEXITCODE. If this is the initial submission, submit the generated manifests from 'installer/winget/manifests' or run initial submission." -ForegroundColor Yellow
+            }
+          } catch {
+            Write-Host "Notice: Submission encountered: $_" -ForegroundColor Yellow
+          }

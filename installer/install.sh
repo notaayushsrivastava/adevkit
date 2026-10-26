@@ -49,7 +49,7 @@ echo "[*] Detected OS: ${PLATFORM}, Architecture: ${ARCH_TAG}"
 # Get latest release tag
 LATEST_TAG=$(curl -s "https://api.github.com/repos/${REPO}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 if [ -z "${LATEST_TAG}" ]; then
-    LATEST_TAG="v0.1.3"
+    LATEST_TAG="v0.1.4"
 fi
 
 VERSION="${LATEST_TAG#v}"

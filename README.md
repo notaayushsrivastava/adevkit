@@ -12,8 +12,14 @@
 > **One-Command Project Scaffolding with Agentic Skills, AI Assistant Guidelines & Environment Setup**  
 > Developed and published by **[Aayush Srivastava](https://aayushsrivastava.com)**
 
-[![adevkit Builds](https://github.com/notaayushsrivastava/adevkit/actions/workflows/release.yml/badge.svg)](https://github.com/notaayushsrivastava/adevkit/actions/workflows/release.yml)
-[![Website](https://img.shields.io/badge/Author-Aayush%20Srivastava-blue)](https://aayushsrivastava.com)
+[![Build & Release](https://github.com/notaayushsrivastava/adevkit/actions/workflows/release.yml/badge.svg)](https://github.com/notaayushsrivastava/adevkit/actions/workflows/release.yml)
+[![PyPI Version](https://img.shields.io/pypi/v/adevkit.svg?color=blue)](https://pypi.org/project/adevkit/)
+[![Python Versions](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://pypi.org/project/adevkit/)
+[![GitHub Release](https://img.shields.io/github/v/release/notaayushsrivastava/adevkit?color=brightgreen&label=release)](https://github.com/notaayushsrivastava/adevkit/releases/latest)
+[![WinGet Package](https://img.shields.io/badge/winget-notaayushsrivastava.adevkit-0078D4?logo=windows&logoColor=white)](https://github.com/microsoft/winget-pkgs)
+[![APT Repository](https://img.shields.io/badge/apt-repository-A81D33?logo=debian&logoColor=white)](https://notaayushsrivastava.github.io/adevkit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Author](https://img.shields.io/badge/Author-Aayush%20Srivastava-111827?logo=google-chrome&logoColor=white)](https://aayushsrivastava.com)
 
 **adevkit** (Aayush's DevKit) is a fast, interactive developer toolkit CLI designed to initialize production-ready projects in seconds. It handles everything: asking project names, generating tailored codebases, selecting target AI coding assistants (Antigravity, Cursor, Claude Code, GitHub Copilot, Windsurf, Aider), auto-installing curated and custom AI agent skills (like `skills.sh`), creating comprehensive specifications, securely storing API credentials (with Windows DPAPI encryption), and setting up isolated Python virtual environments, Git, Node packages, and VSCode settings.
 
@@ -80,9 +86,39 @@ curl -fsSL https://raw.githubusercontent.com/notaayushsrivastava/adevkit/main/in
 ```
 
 ### 3. Native Platform Installers
-- **Windows**: Download and run [`AayushsDevKit-v0.1.3-x64.msi`](https://github.com/notaayushsrivastava/adevkit/releases). It automatically configures `adevkit` (and alias `devkit`) in your system `PATH`.
-- **macOS**: Download and run [`AayushsDevKit-v0.1.3-macos.pkg`](https://github.com/notaayushsrivastava/adevkit/releases) (or extract `devkit-v0.1.3-macos-arm64.tar.gz`).
-- **Linux (Debian/Ubuntu)**: Download [`adevkit_0.1.3_amd64.deb`](https://github.com/notaayushsrivastava/adevkit/releases) and run `sudo dpkg -i adevkit_0.1.3_amd64.deb` (or extract `devkit-v0.1.3-linux-x64.tar.gz`).
+- **Windows (WinGet)**: Install and update directly via Windows Package Manager:
+  ```powershell
+  winget install notaayushsrivastava.adevkit
+  ```
+- **Windows (Direct MSI)**: Download and run [`AayushsDevKit-v0.1.4-x64.msi`](https://github.com/notaayushsrivastava/adevkit/releases). It automatically configures `adevkit` (and alias `devkit`) in your system `PATH`.
+- **macOS**: Download and run [`AayushsDevKit-v0.1.4-macos.pkg`](https://github.com/notaayushsrivastava/adevkit/releases) (or extract `devkit-v0.1.4-macos-arm64.tar.gz`).
+- **Linux (Debian/Ubuntu)**: Download [`notaayushsrivastava.adevkit_0.1.4_amd64.deb`](https://github.com/notaayushsrivastava/adevkit/releases) and run `sudo dpkg -i notaayushsrivastava.adevkit_0.1.4_amd64.deb` (or extract `devkit-v0.1.4-linux-x64.tar.gz`).
+- **APT repository (Debian/Ubuntu)**: Configure the repository once, then install and update with APT:
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/notaayushsrivastava/adevkit/main/installer/install-apt.sh | bash
+  ```
+  This adds the signed APT source and installs `notaayushsrivastava.adevkit`. Future updates are available through:
+  ```bash
+  sudo apt update
+  sudo apt install notaayushsrivastava.adevkit
+  ```
+
+The APT repository is published to GitHub Pages by the release workflow. Repository
+maintainers must enable Pages for the `gh-pages` branch and add an
+`APT_GPG_PRIVATE_KEY` Actions secret containing the ASCII-armored private key used
+to sign repository metadata. Generate a dedicated key with:
+```bash
+gpg --quick-generate-key "adevkit APT repository" rsa3072 sign 2y
+gpg --armor --export-secret-keys "adevkit APT repository" > apt-private-key.asc
+```
+Keep `apt-private-key.asc` private; only the generated public key is published.
+
+WinGet submissions to the Windows Package Manager Community Repository (`microsoft/winget-pkgs`)
+are automated by `.github/workflows/winget-submission.yml`. Repository maintainers
+should configure a `WINGET_TOKEN` Actions secret (a Classic GitHub Personal Access Token
+with `public_repo` and `workflow` scopes) and fork `microsoft/winget-pkgs` to allow
+automated pull request generation. Manifests are generated and validated via
+`.\installer\build_winget_manifest.ps1`.
 
 ### 4. Run Directly from Source
 ```powershell
