@@ -8,6 +8,8 @@ from adevkit.vault import (
     set_default_agents,
     get_preferred_python_pm,
     set_preferred_python_pm,
+    get_preferred_node_pm,
+    set_preferred_node_pm,
 )
 
 
@@ -58,3 +60,14 @@ def test_vault_python_pm_preference(tmp_path, monkeypatch):
     assert get_preferred_python_pm() == "uv"
     set_preferred_python_pm("pip")
     assert get_preferred_python_pm() == "pip"
+
+
+def test_vault_node_pm_preference(tmp_path, monkeypatch):
+    test_vault = tmp_path / "test_vault.json"
+    monkeypatch.setattr("adevkit.vault.VAULT_FILE", test_vault)
+
+    assert get_preferred_node_pm() is None
+    set_preferred_node_pm("pnpm")
+    assert get_preferred_node_pm() == "pnpm"
+    set_preferred_node_pm("bun")
+    assert get_preferred_node_pm() == "bun"

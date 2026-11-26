@@ -1,18 +1,18 @@
 from pathlib import Path
-from adevkit.skills.custom import (
+from adevkit.core.skills.custom import (
     create_custom_skill,
     add_custom_skill,
     remove_custom_skill,
     list_custom_skills,
 )
-from adevkit.skills.catalog import load_all_skills
+from adevkit.core.skills.catalog import load_all_skills
 
 
 def test_custom_skill_lifecycle(tmp_path, monkeypatch):
     test_user_skills = tmp_path / "user_skills"
     test_user_skills.mkdir()
-    monkeypatch.setattr("adevkit.skills.custom.USER_SKILLS_DIR", test_user_skills)
-    monkeypatch.setattr("adevkit.skills.catalog.USER_SKILLS_DIR", test_user_skills)
+    monkeypatch.setattr("adevkit.core.skills.custom.USER_SKILLS_DIR", test_user_skills)
+    monkeypatch.setattr("adevkit.core.skills.catalog.USER_SKILLS_DIR", test_user_skills)
 
     # 1. Create a custom skill
     dest = create_custom_skill(

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>adevkit — Scaffold projects. Equip your agents.</title>
+  <meta name="description" content="Single-command project scaffolding with AI agent guidelines, bundled skills, multi-language package management, encrypted vault, and desktop Studio GUI.">
+  <meta property="og:title" content="adevkit — Scaffold projects. Equip your agents.">
+  <meta property="og:description" content="One command initializes templates, AGENTS.md, PRD.md, bundled skills, encrypted secrets, and Python/Node/Rust environments.">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="/" class="brand">
+        <img src="/assets/favicon.svg" width="30" height="30" alt="adevkit logo">
+        <span>adevkit</span>
+        <span class="version-pill">v0.1.5</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#templates" class="nav-link">Templates</a>
+        <a href="#agents" class="nav-link">Agents &amp; Skills</a>
+        <a href="#install" class="nav-link">Install</a>
+        <a href="https://docs.adevkit.aayushsrivastava.com" class="nav-link" target="_blank" rel="noopener">Docs</a>
+        <a href="https://github.com/notaayushsrivastava/adevkit" class="nav-link" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <a href="https://docs.adevkit.aayushsrivastava.com" class="nav-cta" target="_blank" rel="noopener">Read the Docs</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="container">
+        <div class="hero-eyebrow">CLI + Studio GUI · Windows · macOS · Linux</div>
+        <h1>Scaffold projects. Equip your agents.</h1>
+        <p class="hero-sub">
+          The setup work you repeat on every repository—templates, AI assistant guidelines, bundled skills, encrypted secrets, and Python/Node/Rust toolchains—done in one command.
+        </p>
+        <div class="hero-actions">
+          <div class="install-pill">
+            <span>$ pip install adevkit</span>
+            <button type="button" class="copy-btn" data-copy="pip install adevkit">Copy</button>
+          </div>
+          <a href="https://docs.adevkit.aayushsrivastava.com" class="btn btn-primary" target="_blank" rel="noopener">Get Started</a>
+          <a href="https://github.com/notaayushsrivastava/adevkit" class="btn" target="_blank" rel="noopener">View on GitHub</a>
+        </div>
+
+        <div class="terminal-card reveal">
+          <div class="terminal-bar">
+            <span>adevkit · init</span>
+            <span>Python 3.10+ · Cargo · Node PM</span>
+          </div>
+          <div class="terminal-body">
+            <div class="log-row"><span class="log-tag t-muted">$</span><span class="t-sky">adevkit init my-saas-app --template nextjs --agent cursor --agent claude</span></div>
+            <div class="log-row"><span class="log-tag t-ok">[ok]</span><span class="t-sec">Generated 18 template files in ./my-saas-app</span></div>
+            <div class="log-row"><span class="log-tag t-ok">[ok]</span><span class="t-sec">Installed curated skills into .agents/skills/ &amp; wrote skills-lock.json</span></div>
+            <div class="log-row"><span class="log-tag t-ok">[ok]</span><span class="t-sec">Configured AGENTS.md, .cursor/rules/, and CLAUDE.md</span></div>
+            <div class="log-row"><span class="log-tag t-ok">[ok]</span><span class="t-sec">Initialized Git repository, .env, .vscode/, and dependencies</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 01 Features -->
+    <section id="features" class="section">
+      <div class="container">
+        <div class="section-num">01 · WORKFLOW</div>
+        <h2>The setup work you repeat on every project, done once.</h2>
+        <p class="section-lead">Run the interactive CLI wizard, pass flags for CI automation, or launch the ReactPy + PyWebView desktop Studio with <code>adevkit gui</code>.</p>
+        <div class="grid-3">
+          <article class="card reveal">
+            <div class="card-head"><span class="card-title">12 Built-In Starters</span><span class="badge b-py">Templates</span></div>
+            <p class="card-desc">Next.js 15, SaaS Fullstack, FastAPI, AI Agents, Rust CLI, Rust Axum, Expo Mobile, Astro, and more—plus custom folder snapshots.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-head"><span class="card-title">Multi-Ecosystem Deps</span><span class="badge b-rust">Cargo · npm · uv</span></div>
+            <p class="card-desc">Run <code>adevkit add</code> or <code>adevkit remove</code> anywhere. Automatically detects Cargo, bun/pnpm/yarn/npm, or uv/pip.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-head"><span class="card-title">Studio Desktop GUI</span><span class="badge b-ok">ReactPy + PyWebView</span></div>
+            <p class="card-desc">Visual project wizard, live terminal stream, dependency table, skills hub, vault editor, and diagnostics via <code>adevkit gui</code>.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 Templates -->
+    <section id="templates" class="section">
+      <div class="container">
+        <div class="section-num">02 · STARTERS</div>
+        <h2>Twelve starting points, plus your own.</h2>
+        <p class="section-lead">Snapshot any local repository into a reusable template with <code>adevkit template save &lt;name&gt;</code>.</p>
+        <div class="grid-3">
+          <article class="card reveal"><div class="card-head"><div><div class="card-title">Next.js 15</div><div class="card-id">nextjs</div></div><span class="badge b-node">JS / TS</span></div><p class="card-desc">App Router, React 19, TypeScript, Tailwind CSS, wired for agent-assisted work.</p></article>
+          <article class="card reveal"><div class="card-head"><div><div class="card-title">SaaS Fullstack</div><div class="card-id">saas_fullstack</div></div><span class="badge b-node">JS / TS</span></div><p class="card-desc">Next.js 15, Prisma ORM, Stripe billing hooks, and authentication scaffolding.</p></article>
+          <article class="card reveal"><div class="card-head"><div><div class="card-title">Python FastAPI</div><div class="card-id">python_fastapi</div></div><span class="badge b-py">Python</span></div><p class="card-desc">Async FastAPI backend, Pydantic v2, Typer CLI, and pytest setup.</p></article>
+          <article class="card reveal"><div class="card-head"><div><div class="card-title">AI Agents Python</div><div class="card-id">ai_agents_python</div></div><span class="badge b-py">Python</span></div><p class="card-desc">Multi-agent orchestration starter with state graphs, memory, and FastAPI endpoints.</p></article>
+          <article class="card reveal"><div class="card-head"><div><div class="card-title">Rust CLI</div><div class="card-id">rust_cli</div></div><span class="badge b-rust">Rust</span></div><p class="card-desc">Clap v4 derive, Tokio async runtime, Anyhow error handling, and structured logging.</p></article>
+          <article class="card reveal"><div class="card-head"><div><div class="card-title">Rust Axum</div><div class="card-id">rust_axum</div></div><span class="badge b-rust">Rust</span></div><p class="card-desc">Axum 0.7 web service with Tokio, Tower-HTTP tracing/CORS, and Serde JSON.</p></article>
+          <article class="card reveal"><div class="card-head"><div><div class="card-title">Expo Mobile</div><div class="card-id">expo_mobile</div></div><span class="badge b-node">JS / TS</span></div><p class="card-desc">Cross-platform React Native + Expo SDK + TypeScript starter.</p></article>
+          <article class="card reveal"><div class="card-head"><div><div class="card-title">Expo Fullstack</div><div class="card-id">expo_fullstack</div></div><span class="badge b-py">Fullstack</span></div><p class="card-desc">Monorepo pairing Expo mobile frontend with FastAPI or Node Hono backend.</p></article>
+          <article class="card reveal"><div class="card-head"><div><div class="card-title">Minimal Agentic</div><div class="card-id">minimal_agentic</div></div><span class="badge b-neutral">Universal</span></div><p class="card-desc">Clean workspace pre-equipped with AGENTS.md, PRD.md, and curated skills.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 Agents & Skills -->
+    <section id="agents" class="section">
+      <div class="container">
+        <div class="section-num">03 · CONTEXT &amp; SKILLS</div>
+        <h2>Every assistant starts with the same context.</h2>
+        <p class="section-lead">Generate native rule files for Antigravity, Cursor, Claude Code, GitHub Copilot, Windsurf, and Aider—plus offline-ready agent skills.</p>
+        <div class="grid-2">
+          <article class="card reveal">
+            <div class="card-head"><h3>AGENTS.md and PRD.md, per assistant</h3><span class="badge b-py">6 Agents</span></div>
+            <p class="card-desc">Writes tailored project instructions into <code>AGENTS.md</code>, <code>.cursor/rules/</code>, <code>CLAUDE.md</code>, <code>.github/copilot-instructions.md</code>, and <code>.windsurfrules</code> so every tool shares one source of truth.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-head"><h3>Curated skills, bundled for offline use</h3><span class="badge b-ok">skills.sh compatible</span></div>
+            <p class="card-desc">Install embedded skills or pull from GitHub repos and local paths via <code>adevkit skills add</code>. Tracks versions in <code>skills-lock.json</code>.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 Vault -->
+    <section class="section">
+      <div class="container">
+        <div class="section-num">04 · SECURITY</div>
+        <h2>Keys stay encrypted on your machine.</h2>
+        <p class="section-lead">Store API keys and global toolchain defaults in <code>~/.adevkit/vault.json</code> without plaintext leaks.</p>
+        <div class="grid-2">
+          <article class="card reveal">
+            <div class="card-head"><span class="card-title">Windows DPAPI Protection</span><span class="badge b-ok">Hardware Protected</span></div>
+            <p class="card-desc">On Windows, sensitive keys (<code>*_key</code>, <code>*_token</code>, <code>*_secret</code>) are encrypted via native <code>CryptProtectData</code> bound to your user account.</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-head"><span class="card-title">POSIX Salted Key Derivation</span><span class="badge b-neutral">macOS &amp; Linux</span></div>
+            <p class="card-desc">On macOS and Linux, secrets are encrypted with a machine-and-user derived key and masked by default in CLI and Studio outputs.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 Install Channels -->
+    <section id="install" class="section">
+      <div class="container">
+        <div class="section-num">05 · INSTALLATION</div>
+        <h2>Pick your channel.</h2>
+        <p class="section-lead">Install with the Studio GUI included, pick the headless CLI-only extra, or use native OS package managers.</p>
+
+        <div class="tabs" role="tablist" aria-label="Installation channels">
+          <button type="button" class="tab-btn active" role="tab" data-channel="pip">pip (Full + GUI)</button>
+          <button type="button" class="tab-btn" role="tab" data-channel="pip-cli">pip (CLI-only)</button>
+          <button type="button" class="tab-btn" role="tab" data-channel="winget">WinGet</button>
+          <button type="button" class="tab-btn" role="tab" data-channel="apt">APT (Debian/Ubuntu)</button>
+          <button type="button" class="tab-btn" role="tab" data-channel="macos">macOS PKG</button>
+        </div>
+
+        <div class="channel-panel reveal">
+          <code id="channel-cmd" class="channel-cmd">pip install adevkit</code>
+          <button id="channel-copy" type="button" class="copy-btn" data-copy="pip install adevkit">Copy</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>Built by <a href="https://aayushsrivastava.com" target="_blank" rel="noopener" style="color:var(--text-primary)">Aayush Srivastava</a> · MIT License</div>
+      <div class="footer-links">
+        <a href="https://docs.adevkit.aayushsrivastava.com" target="_blank" rel="noopener">Documentation</a>
+        <a href="https://pypi.org/project/adevkit/" target="_blank" rel="noopener">PyPI</a>
+        <a href="https://github.com/notaayushsrivastava/adevkit" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

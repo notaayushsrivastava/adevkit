@@ -1,8 +1,8 @@
-﻿# Created using adevkit WinGet generator
+# Created using adevkit WinGet generator
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
 
 PackageIdentifier: notaayushsrivastava.adevkit
-PackageVersion: 0.1.4
+PackageVersion: 0.1.5
 PackageLocale: en-US
 Publisher: Aayush Srivastava
 PublisherUrl: https://aayushsrivastava.com

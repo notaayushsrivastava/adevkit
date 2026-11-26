@@ -10,6 +10,7 @@ class BaseTemplate(ABC):
     category: str = "General"
     has_node: bool = False
     has_python: bool = False
+    has_rust: bool = False
 
     def __init__(self, project_name: str, target_dir: Path, author: str = "Aayush"):
         self.project_name = project_name

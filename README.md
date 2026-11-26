@@ -1,11 +1,6 @@
-```text
- █████╗  █████╗ ██╗   ██╗██╗   ██╗███████╗██╗  ██╗███████╗    ██████╗ ███████╗██╗   ██╗██╗  ██╗██╗████████╗
-██╔══██╗██╔══██╗╚██╗ ██╔╝██║   ██║██╔════╝██║  ██║██╔════╝    ██╔══██╗██╔════╝██║   ██║██║ ██╔╝██║╚══██╔══╝
-███████║███████║ ╚████╔╝ ██║   ██║███████╗███████║███████╗    ██║  ██║█████╗  ██║   ██║█████╔╝ ██║   ██║   
-██╔══██║██╔══██║  ╚██╔╝  ██║   ██║╚════██║██╔══██║╚════██║    ██║  ██║██╔══╝  ╚██╗ ██╔╝██╔═██╗ ██║   ██║   
-██║  ██║██║  ██║   ██║   ╚██████╔╝███████║██║  ██║███████║    ██████╔╝███████╗ ╚████╔╝ ██║  ██╗██║   ██║   
-╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝    ╚═════╝ ╚══════╝  ╚═══╝  ╚═╝  ╚═╝╚═╝   ╚═╝   
-```
+<p align="center">
+  <img src="assets/banner.svg" alt="adevkit - Scaffold projects. Equip your AI agents." width="100%" />
+</p>
 
 # adevkit (Aayush's DevKit)
 
@@ -28,17 +23,19 @@
 ## Features
 
 - **Interactive Terminal UI**: Built with `Typer`, `Rich`, and `InquirerPy` featuring branded ASCII art, arrow-key navigation, live progress spinners, and status tables.
-- **10 Built-In Project Starters**:
+- **12 Built-In Project Starters**:
   1. `nextjs`: Full-Stack Next.js 14/15 App Router, React 19, TypeScript, Tailwind CSS, Lucide Icons, and shadcn-ready layout.
   2. `saas_fullstack`: Production-grade SaaS starter with Next.js 15, Prisma ORM, Stripe subscriptions, and Auth.
   3. `design_system`: Tokenized UI component library with Framer Motion, accessible primitives, and interactive showcase.
   4. `content_site`: Blazing-fast content and marketing website with Astro 4, Tailwind Typography, and zero JS by default.
   5. `python_fastapi`: Modern async Python backend with FastAPI, Pydantic v2, Typer CLI, and automated `.venv` & pytest.
   6. `ai_agents_python`: Asynchronous multi-agent framework starter with state graphs, memory, and FastAPI endpoints.
-  7. `vite_react`: Ultra-fast Frontend SPA with Vite 5, React 18, TypeScript, and Tailwind CSS.
-  8. `minimal_agentic`: Clean blank repository with agent tools, `AGENTS.md`, and `PRD.md` ready for AI pair programming.
-  9. `expo_mobile`: Cross-platform mobile starter with React Native, Expo SDK, and TypeScript.
-  10. `expo_fullstack`: Monorepo with Expo React Native mobile `frontend/` and selectable `backend/` (FastAPI or Node.js Hono).
+  7. `rust_cli`: Modern asynchronous Rust command-line tool with Clap v4 derive, Tokio runtime, Anyhow error handling, and structured logging.
+  8. `rust_axum`: Blazing-fast async web service with Axum 0.7, Tokio, Tower-HTTP CORS/Trace middleware, Serde JSON, and health endpoints.
+  9. `vite_react`: Ultra-fast Frontend SPA with Vite 5, React 18, TypeScript, and Tailwind CSS.
+  10. `minimal_agentic`: Clean blank repository with agent tools, `AGENTS.md`, and `PRD.md` ready for AI pair programming.
+  11. `expo_mobile`: Cross-platform mobile starter with React Native, Expo SDK, and TypeScript.
+  12. `expo_fullstack`: Monorepo with Expo React Native mobile `frontend/` and selectable `backend/` (FastAPI or Node.js Hono).
 - **Custom Template Engine**:
   - `adevkit template save <NAME>`: Snapshot any existing directory or repo into reusable custom templates saved in `~/.adevkit/templates/`.
   - `adevkit template list`: View all built-in and custom templates.
@@ -53,8 +50,9 @@
     - **`nextlevelbuilder/ui-ux-pro-max-skill`**: `ui-ux-pro-max`, `design`, `design-system`, `ui-styling`, `brand`, `banner-design`, `slides`.
     - **`emilkowalski/skills`**: `emil-design-eng`, `animate`, `animate-expo`, `animation-performance`, `apple-design`, `break-ui`, `improve-animations`, `mobile-native`.
 - **Automated Environment Setup**:
+  - **Rust**: Automated toolchain verification and pre-fetching dependencies via `cargo check`.
   - **Python**: Automated `.venv` creation and dependency installation via **`uv`** (Astral's ultra-fast Python manager) or standard `venv`/`pip`. Configurable per-project via `--uv`/`--no-uv` or globally via `adevkit config set-python-pm uv`.
-  - **Node.js**: Automatically detects `bun`, `pnpm`, `yarn`, or `npm` and installs `node_modules`.
+  - **Node.js**: Automatically detects `bun`, `pnpm`, `yarn`, or `npm` and installs `node_modules` (configurable globally via `adevkit config set-node-pm`).
   - **Git**: Initializes repository and crafts stack-tailored `.gitignore`.
   - **Environment**: Copies `.env.example` to `.env` without overwriting.
   - **VSCode**: Scaffolds `.vscode/settings.json` and `.vscode/extensions.json`.
@@ -90,9 +88,9 @@ curl -fsSL https://raw.githubusercontent.com/notaayushsrivastava/adevkit/main/in
   ```powershell
   winget install notaayushsrivastava.adevkit
   ```
-- **Windows (Direct MSI)**: Download and run [`AayushsDevKit-v0.1.4-x64.msi`](https://github.com/notaayushsrivastava/adevkit/releases). It automatically configures `adevkit` (and alias `devkit`) in your system `PATH`.
-- **macOS**: Download and run [`AayushsDevKit-v0.1.4-macos.pkg`](https://github.com/notaayushsrivastava/adevkit/releases) (or extract `devkit-v0.1.4-macos-arm64.tar.gz`).
-- **Linux (Debian/Ubuntu)**: Download [`notaayushsrivastava.adevkit_0.1.4_amd64.deb`](https://github.com/notaayushsrivastava/adevkit/releases) and run `sudo dpkg -i notaayushsrivastava.adevkit_0.1.4_amd64.deb` (or extract `devkit-v0.1.4-linux-x64.tar.gz`).
+- **Windows (Direct MSI)**: Download and run [`AayushsDevKit-v0.1.5-x64.msi`](https://github.com/notaayushsrivastava/adevkit/releases). It automatically configures `adevkit` (and alias `devkit`) in your system `PATH`.
+- **macOS**: Download and run [`AayushsDevKit-v0.1.5-macos.pkg`](https://github.com/notaayushsrivastava/adevkit/releases) (or extract `devkit-v0.1.5-macos-arm64.tar.gz`).
+- **Linux (Debian/Ubuntu)**: Download [`notaayushsrivastava.adevkit_0.1.5_amd64.deb`](https://github.com/notaayushsrivastava/adevkit/releases) and run `sudo dpkg -i notaayushsrivastava.adevkit_0.1.5_amd64.deb` (or extract `devkit-v0.1.5-linux-x64.tar.gz`).
 - **APT repository (Debian/Ubuntu)**: Configure the repository once, then install and update with APT:
   ```bash
   curl -fsSL https://raw.githubusercontent.com/notaayushsrivastava/adevkit/main/installer/install-apt.sh | bash
@@ -143,6 +141,26 @@ adevkit init my-saas -t saas_fullstack
 
 # Non-interactive / CI mode
 adevkit init my-app -t nextjs -s ponytail -s impeccable -s design-taste-frontend --yes
+```
+
+### Manage Dependencies & Libraries (Rust, JS/TS, Python)
+`adevkit add` automatically detects your project type based on local manifest files (`Cargo.toml` for Rust, `package.json` for JavaScript/TypeScript, or `pyproject.toml` / `requirements.txt` for Python):
+```powershell
+# Add libraries to the current project
+adevkit add serde
+adevkit add axios
+adevkit add fastapi
+
+# Add development dependencies (--dev or -D)
+adevkit add tokio --dev
+adevkit add typescript -D
+
+# Remove libraries
+adevkit remove lodash
+adevkit remove tempfile
+
+# List installed dependencies
+adevkit deps list
 ```
 
 ### Manage Custom Templates
@@ -216,8 +234,13 @@ adevkit config set openai_api_key "sk-proj-..."
 # Configure global default AI coding assistants for project scaffolding
 adevkit config set-agents antigravity cursor claude copilot
 
+# Configure default package managers
+adevkit config set-python-pm uv
+adevkit config set-node-pm pnpm
+
 # Retrieve a value (optionally reveal unmasked secret)
 adevkit config get anthropic_api_key --reveal
+adevkit config get-node-pm
 
 # Delete a configuration key
 adevkit config delete openai_api_key
@@ -243,7 +266,7 @@ adevkit info
 
 ## Running Tests
 
-The test suite covers all 10 templates, custom template snapshots, skills installation, lockfile verification, and environment setup:
+The test suite covers all 12 templates, dependency management across ecosystems, custom template snapshots, skills installation, lockfile verification, and environment setup:
 
 ```powershell
 .\.venv\Scripts\pytest.exe tests/ -v

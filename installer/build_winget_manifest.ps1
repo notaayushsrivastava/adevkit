@@ -10,7 +10,7 @@
     Optionally computes the SHA256 checksum from a local MSI and validates with winget validate.
 
 .PARAMETER Version
-    The package version (e.g. 0.1.4). Auto-detected from pyproject.toml if omitted.
+    The package version (e.g. 0.1.5). Auto-detected from pyproject.toml if omitted.
 
 .PARAMETER PackageIdentifier
     WinGet package identifier (default: notaayushsrivastava.adevkit).
@@ -50,7 +50,7 @@ if (-not $Version -or $Version.Trim() -eq "") {
     }
 }
 if (-not $Version) {
-    $Version = "0.1.4"
+    $Version = "0.1.5"
 }
 $Version = $Version.Trim().TrimStart('v')
 

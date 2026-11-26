@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-label="adevkit 1280x640 banner">
+  <defs>
+    <radialGradient id="sky-glow" cx="0.22" cy="0.48" r="0.55">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Canvas -->
+  <rect width="1280" height="640" fill="#090A0F"/>
+  <rect width="1280" height="640" fill="url(#sky-glow)"/>
+  <rect x="0.5" y="0.5" width="1279" height="639" fill="none" stroke="#242838"/>
+
+  <!-- Left Column: Brand + Headline + Install -->
+  <g transform="translate(68, 68)">
+    <!-- Brand Lockup -->
+    <rect x="0.5" y="0.5" width="47" height="47" rx="12" fill="#12141C" stroke="#3B4259"/>
+    <path d="M15 16l10 8-10 8" fill="none" stroke="#38BDF8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M28 33h9" stroke="#F1F5F9" stroke-width="4" stroke-linecap="round"/>
+    <text x="64" y="33" fill="#F1F5F9" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="26" font-weight="700" letter-spacing="-0.015em">adevkit</text>
+    <rect x="172" y="10" width="68" height="26" rx="13" fill="#12141C" stroke="#242838"/>
+    <text x="206" y="27" text-anchor="middle" fill="#7B8AA0" font-family="'JetBrains Mono', Menlo, Consolas, monospace" font-size="12" font-weight="500">v0.1.5</text>
+
+    <!-- Headline -->
+    <text x="0" y="168" fill="#F1F5F9" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="56" font-weight="700" letter-spacing="-0.03em">Scaffold projects.</text>
+    <text x="0" y="232" fill="#F1F5F9" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="56" font-weight="700" letter-spacing="-0.03em">Equip your agents.</text>
+
+    <!-- Subtitle -->
+    <text x="0" y="286" fill="#94A3B8" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="400">12 templates, bundled agent skills, multi-language deps,</text>
+    <text x="0" y="316" fill="#94A3B8" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="400">and encrypted vault—from CLI or Studio GUI.</text>
+
+    <!-- Ecosystem Pills -->
+    <g transform="translate(0, 356)">
+      <rect width="74" height="30" rx="7" fill="rgba(56,189,248,0.12)" stroke="rgba(56,189,248,0.3)"/>
+      <text x="37" y="20" text-anchor="middle" fill="#38BDF8" font-family="Inter, sans-serif" font-size="13" font-weight="600">Python</text>
+
+      <rect x="86" width="84" height="30" rx="7" fill="rgba(34,197,94,0.12)" stroke="rgba(34,197,94,0.3)"/>
+      <text x="128" y="20" text-anchor="middle" fill="#22C55E" font-family="Inter, sans-serif" font-size="13" font-weight="600">Node.js</text>
+
+      <rect x="182" width="66" height="30" rx="7" fill="rgba(222,165,132,0.12)" stroke="rgba(222,165,132,0.3)"/>
+      <text x="215" y="20" text-anchor="middle" fill="#DEA584" font-family="Inter, sans-serif" font-size="13" font-weight="600">Rust</text>
+
+      <rect x="260" width="98" height="30" rx="7" fill="rgba(16,185,129,0.12)" stroke="rgba(16,185,129,0.3)"/>
+      <text x="309" y="20" text-anchor="middle" fill="#10B981" font-family="Inter, sans-serif" font-size="13" font-weight="600">Studio GUI</text>
+    </g>
+
+    <!-- Install Command -->
+    <text x="0" y="486" fill="#38BDF8" font-family="'JetBrains Mono', Menlo, Consolas, monospace" font-size="17" font-weight="500">$ pip install adevkit</text>
+  </g>
+
+  <!-- Right Column: Terminal Card -->
+  <g transform="translate(656, 130)">
+    <rect x="0.5" y="0.5" width="555" height="380" rx="14" fill="#12141C" stroke="#242838"/>
+    <path d="M1 14.5A13.5 13.5 0 0 1 14.5 1h527A13.5 13.5 0 0 1 555.5 14.5V45H1V14.5Z" fill="#1A1D28"/>
+    <line x1="0" y1="45.5" x2="556" y2="45.5" stroke="#242838"/>
+    <text x="20" y="28" fill="#94A3B8" font-family="'JetBrains Mono', Menlo, Consolas, monospace" font-size="13">adevkit · generate</text>
+    <circle cx="516" cy="23" r="5" fill="#242838"/>
+    <circle cx="534" cy="23" r="5" fill="#38BDF8"/>
+
+    <!-- Terminal Lines -->
+    <g transform="translate(22, 82)" font-family="'JetBrains Mono', Menlo, Consolas, monospace" font-size="14">
+      <text x="0" y="0" fill="#7B8AA0">$</text>
+      <text x="48" y="0" fill="#F1F5F9">adevkit init my-saas-app -t nextjs</text>
+
+      <text x="0" y="38" fill="#10B981">[ok]</text>
+      <text x="48" y="38" fill="#94A3B8">Scaffolded 18 template files</text>
+
+      <text x="0" y="76" fill="#10B981">[ok]</text>
+      <text x="48" y="76" fill="#94A3B8">Installed skills into .agents/skills/</text>
+
+      <text x="0" y="114" fill="#10B981">[ok]</text>
+      <text x="48" y="114" fill="#94A3B8">Wrote AGENTS.md for Cursor &amp; Claude</text>
+
+      <text x="0" y="152" fill="#10B981">[ok]</text>
+      <text x="48" y="152" fill="#94A3B8">Generated structured PRD.md &amp; README</text>
+
+      <text x="0" y="190" fill="#10B981">[ok]</text>
+      <text x="48" y="190" fill="#94A3B8">Initialized Git, .env &amp; .vscode/</text>
+
+      <text x="0" y="238" fill="#38BDF8">[done]</text>
+      <text x="64" y="238" fill="#F1F5F9">Ready in 1.2s — happy shipping.</text>
+    </g>
+  </g>
+</svg>

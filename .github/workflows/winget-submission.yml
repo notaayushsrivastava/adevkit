@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       release_version:
-        description: 'Version tag override (e.g. 0.1.4). Leave empty to read from pyproject.toml'
+        description: 'Version tag override (e.g. 0.1.5). Leave empty to read from pyproject.toml'
         required: false
         default: ''
 
@@ -42,7 +42,7 @@ jobs:
             if ($content -match 'version\s*=\s*["'']([^"'']+)["'']') {
               $version = $matches[1]
             } else {
-              $version = "0.1.4"
+              $version = "0.1.5"
             }
           }
           Write-Host "Target Version for WinGet: $version" -ForegroundColor Green

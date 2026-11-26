@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="240" viewBox="0 0 1200 240" role="img" aria-label="adevkit banner">
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#090A0F"/>
+      <stop offset="100%" stop-color="#12141C"/>
+    </linearGradient>
+    <radialGradient id="sky-glow" cx="0.18" cy="0.5" r="0.45">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Canvas -->
+  <rect x="0.5" y="0.5" width="1199" height="239" rx="16" fill="url(#bg-grad)" stroke="#242838"/>
+  <rect x="1" y="1" width="1198" height="238" rx="15.5" fill="url(#sky-glow)"/>
+
+  <!-- Primary Mark (from ui.html) -->
+  <g transform="translate(64, 60)">
+    <rect x="0.5" y="0.5" width="119" height="119" rx="28" fill="#090A0F" stroke="#3B4259" stroke-width="2"/>
+    <path d="M37.5 40l25 20-25 20" fill="none" stroke="#38BDF8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M70 82.5h22.5" stroke="#F1F5F9" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <!-- Wordmark & Tagline -->
+  <text x="216" y="114" fill="#F1F5F9" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="54" font-weight="700" letter-spacing="-0.02em">adevkit</text>
+  <text x="218" y="154" fill="#94A3B8" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="400">Scaffold projects. Equip your AI agents. Ship faster.</text>
+
+  <!-- Right Pill -->
+  <g transform="translate(956, 98)">
+    <rect x="0.5" y="0.5" width="180" height="44" rx="22" fill="#1A1D28" stroke="#3B4259"/>
+    <text x="90" y="28" text-anchor="middle" fill="#38BDF8" font-family="'JetBrains Mono', Menlo, Consolas, monospace" font-size="14" font-weight="600">CLI + Studio GUI</text>
+  </g>
+</svg>
