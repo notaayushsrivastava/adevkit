@@ -1,0 +1,40 @@
+name: Feature Request
+description: Propose a new feature, CLI flag, Studio GUI improvement, or workflow enhancement.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Target Area
+      options:
+        - Core Engine (`adevkit/core`)
+        - CLI (`adevkit/cli`)
+        - Studio Desktop GUI (`adevkit/gui`)
+        - Installers & Packaging
+        - Documentation & Web
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What workflow friction or missing capability does this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the CLI command, GUI interaction, or API behavior you have in mind.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would like to submit a Pull Request for this feature.

@@ -274,6 +274,17 @@ The test suite covers all 12 templates, dependency management across ecosystems,
 
 ---
 
+## Contributing, Security & Community
+
+Contributions, bug reports, and new template or skill proposals are welcome:
+- **Contributing Guide**: [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Bug Reports & Feature Requests**: [Open an Issue](https://github.com/notaayushsrivastava/adevkit/issues/new/choose)
+- **Security Policy**: [SECURITY.md](SECURITY.md) (report vulnerabilities privately to `aayush@aayushsrivastava.com`)
+- **Code of Conduct**: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- **Support & Docs**: [SUPPORT.md](SUPPORT.md) · [docs.adevkit.aayushsrivastava.com](https://docs.adevkit.aayushsrivastava.com)
+
+---
+
 ## Author & Publisher
 
 Developed and maintained by **[Aayush Srivastava](https://aayushsrivastava.com)**.

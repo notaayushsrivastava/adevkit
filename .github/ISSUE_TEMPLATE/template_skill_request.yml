@@ -1,0 +1,31 @@
+name: New Template or Skill Proposal
+description: Suggest a new built-in project starter template or curated agent skill.
+title: "[Catalog]: "
+labels: ["catalog", "enhancement"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Catalog Addition Type
+      options:
+        - Built-in Project Template
+        - Curated Agent Skill
+        - README Template Style
+    validations:
+      required: true
+
+  - type: input
+    id: identifier
+    attributes:
+      label: Proposed ID / Name
+      placeholder: e.g. go_fiber, sveltekit, or drizzle-orm
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Stack, Files & Rationale
+      description: List the key dependencies, directory layout, or skill instructions that should be included.
+    validations:
+      required: true

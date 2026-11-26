@@ -1,0 +1,79 @@
+name: Bug Report
+description: Report a crash, incorrect scaffolding output, or UI/CLI bug in adevkit.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug in **adevkit**! Please include your `adevkit info` output so we can reproduce the issue quickly.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - CLI (`adevkit init`, `add`, `config`, etc.)
+        - Studio Desktop GUI (`adevkit gui`)
+        - Project Templates
+        - Agent Skills & Catalog
+        - Dependency Manager (Cargo / npm / uv / pip)
+        - Secure Vault
+        - Installer / Packaging (pip / WinGet / APT / MSI / PKG)
+        - Documentation / Website
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install_channel
+    attributes:
+      label: Installation Channel
+      options:
+        - pip install adevkit
+        - pip install "adevkit[gui]"
+        - pip install "adevkit[cli]"
+        - WinGet (notaayushsrivastava.adevkit)
+        - Windows MSI
+        - APT (Debian / Ubuntu)
+        - macOS PKG
+        - Source / Editable (pip install -e)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Windows 11 / 10
+        - macOS
+        - Linux (Debian / Ubuntu)
+        - Linux (Other)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected to happen instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Run `adevkit ...`
+        2. Select ...
+        3. See error ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: "`adevkit info` Output & Logs"
+      description: Paste the output of `adevkit info` and any relevant traceback or terminal logs.
+      render: text

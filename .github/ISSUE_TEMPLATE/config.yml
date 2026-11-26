@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability Report
+    url: https://github.com/notaayushsrivastava/adevkit/security/advisories/new
+    about: Please report security issues privately via GitHub Security Advisories (or aayush@aayushsrivastava.com).
+  - name: Documentation & Guides
+    url: https://docs.adevkit.aayushsrivastava.com
+    about: Check the official docs for installation, CLI reference, Studio GUI, and troubleshooting.
+  - name: General Questions & Discussions
+    url: https://github.com/notaayushsrivastava/adevkit/discussions
+    about: Ask questions, share templates/skills, or discuss ideas with the community.

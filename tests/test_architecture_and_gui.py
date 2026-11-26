@@ -180,3 +180,23 @@ def test_web_landing_and_readthedocs_configs():
     assert (root / "docs" / "conf.py").exists()
     assert (root / "docs" / "requirements.txt").exists()
     assert (root / "docs" / "index.md").exists()
+
+
+def test_community_and_governance_files():
+    """Verify GitHub issue forms, PR template, CI workflow, and governance docs."""
+    import yaml
+
+    root = Path(__file__).resolve().parent.parent
+
+    for doc_name in ("CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md", "SUPPORT.md"):
+        assert (root / doc_name).is_file(), f"Missing {doc_name}"
+
+    assert (root / ".github" / "PULL_REQUEST_TEMPLATE.md").is_file()
+
+    issue_dir = root / ".github" / "ISSUE_TEMPLATE"
+    for yml_name in ("config.yml", "bug_report.yml", "feature_request.yml", "template_skill_request.yml"):
+        parsed = yaml.safe_load((issue_dir / yml_name).read_text(encoding="utf-8"))
+        assert isinstance(parsed, dict)
+
+    ci_cfg = yaml.safe_load((root / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8"))
+    assert "test" in ci_cfg["jobs"]
